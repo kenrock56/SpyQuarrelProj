@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 84064847a565afb49842c3ef491e00aa
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 264895
+  packageName: Auto Singleton
+  packageVersion: 1.2.0
+  assetPath: Assets/Auto Singleton/Editor/Utilities/StaticDataSerializer.cs
+  uploadId: 927172

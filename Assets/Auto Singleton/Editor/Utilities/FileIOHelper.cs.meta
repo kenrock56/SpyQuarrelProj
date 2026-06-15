@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6b80d2c9eb999d346bb5e4f03cba0aca
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 264895
+  packageName: Auto Singleton
+  packageVersion: 1.2.0
+  assetPath: Assets/Auto Singleton/Editor/Utilities/FileIOHelper.cs
+  uploadId: 927172

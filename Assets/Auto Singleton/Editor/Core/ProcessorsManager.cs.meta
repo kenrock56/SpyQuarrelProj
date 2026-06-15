@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 581adcc939a05c14eb2fe33328183a8c
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 264895
+  packageName: Auto Singleton
+  packageVersion: 1.2.0
+  assetPath: Assets/Auto Singleton/Editor/Core/ProcessorsManager.cs
+  uploadId: 927172

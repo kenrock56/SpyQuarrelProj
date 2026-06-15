@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4db305906a5c01348a375c391c2cf936
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 264895
+  packageName: Auto Singleton
+  packageVersion: 1.2.0
+  assetPath: Assets/Auto Singleton/Editor/AutoSingletonEditorAsm.asmdef
+  uploadId: 927172

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: b167430e9d62c6e40b8264c8598a77c0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 264895
+  packageName: Auto Singleton
+  packageVersion: 1.2.0
+  assetPath: Assets/Auto Singleton/Runtime/User/SingletonAttribute.cs
+  uploadId: 927172

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 07560474e50b37f42929e93316d3fa06
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 264895
+  packageName: Auto Singleton
+  packageVersion: 1.2.0
+  assetPath: Assets/Auto Singleton/Editor/UX/TopBarEntries.cs
+  uploadId: 927172

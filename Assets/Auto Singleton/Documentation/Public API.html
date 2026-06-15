@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto Singleton - Public API</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="layout">
+
+  <!-- ─── Sidebar ─── -->
+  <nav>
+    <div class="nav-title">Public API</div>
+    <a href="#SingletonAttribute"><span class="badge badge-class">attr</span>SingletonAttribute</a>
+    <a href="#Singleton"><span class="badge badge-static">static</span>Singleton</a>
+    <a href="#SingletonT"><span class="badge badge-static">static</span>Singleton&lt;T&gt;</a>
+  </nav>
+
+  <!-- ─── Main ─── -->
+  <main>
+    <div class="page-header">
+      <h1>Public API</h1>
+      <div class="sub">Auto Singleton v1.2.0 &nbsp;&middot;&nbsp; namespace <code>AutoSingleton</code></div>
+    </div>
+
+
+    <!-- ══════════════════════════════════ SingletonAttribute ═══ -->
+    <div class="type-section" id="SingletonAttribute">
+      <div class="type-header">
+        <h2>SingletonAttribute</h2>
+        <span class="badge badge-class">Attribute</span>
+      </div>
+      <p class="type-desc">
+        Decorate a <code>MonoBehaviour</code> or <code>ScriptableObject</code> class with this
+        attribute to register it as an automatically managed singleton. The editor will create and
+        maintain the asset or prefab, and the runtime will instantiate it at startup.
+      </p>
+
+      <div class="member-group">
+        <div class="member-group-title">Public Fields</div>
+        <table class="mt">
+          <tr>
+            <td><span class="t">string</span> <span class="mn">displayName</span></td>
+            <td>Name given to this singleton in the Assets folder.</td>
+          </tr>
+          <tr>
+            <td><span class="t">string</span> <span class="mn">folderPath</span></td>
+            <td>Where to create the asset or prefab, relative to the Assets folder. When <code>inherited</code> is true, derived classes are also created here.</td>
+          </tr>
+          <tr>
+            <td><span class="t">bool</span> <span class="mn">inherited</span></td>
+            <td>When true, the attribute also applies to classes derived from the decorated type.</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════ Singleton ═══ -->
+    <div class="type-section" id="Singleton">
+      <div class="type-header">
+        <h2>Singleton</h2>
+        <span class="badge badge-static">static class</span>
+      </div>
+      <p class="type-desc">
+        Utility to manually add and remove singleton instances at runtime. Use this when you need
+        to register objects that are not covered by <a href="#SingletonAttribute">SingletonAttribute</a>
+        and any reference type is accepted. All methods require play mode.
+      </p>
+      <div class="note">
+        Adding a <code>MonoBehaviour</code> via <code>Add</code> does not reparent it under the
+        Auto Singleton root GameObject, so it will be destroyed on scene load unless you call
+        <code>Object.DontDestroyOnLoad</code> on it yourself.
+      </div>
+
+      <div class="member-group">
+        <div class="member-group-title">Static Methods: Add</div>
+        <table class="mt">
+          <tr>
+            <td><span class="t">void</span> <span class="mn">Add</span>&lt;<span class="t">T</span>&gt;(<span class="t">T</span> singleton) <span class="kw">where</span> T : <span class="kw">class</span></td>
+            <td>Register a singleton instance. Throws <code>ArgumentException</code> if an instance of the same exact type is already registered.</td>
+          </tr>
+          <tr>
+            <td><span class="t">void</span> <span class="mn">Add</span>&lt;<span class="t">T</span>&gt;(<span class="t">IEnumerable&lt;T&gt;</span> singletons) <span class="kw">where</span> T : <span class="kw">class</span></td>
+            <td>Register multiple singleton instances. Throws <code>ArgumentNullException</code> if the collection is null.</td>
+          </tr>
+          <tr>
+            <td><span class="t">void</span> <span class="mn">Add</span>&lt;<span class="t">T</span>&gt;(<span class="kw">params</span> <span class="t">T[]</span> singletons) <span class="kw">where</span> T : <span class="kw">class</span></td>
+            <td>Register multiple singleton instances via params.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="member-group">
+        <div class="member-group-title">Static Methods: Remove</div>
+        <div class="note">
+          Only instances that were manually added via <code>Add</code> can be removed.
+          Automatically managed singletons cannot be removed at runtime.
+        </div>
+        <table class="mt">
+          <tr>
+            <td><span class="t">void</span> <span class="mn">Remove</span>&lt;<span class="t">T</span>&gt;(<span class="t">T</span> singleton) <span class="kw">where</span> T : <span class="kw">class</span></td>
+            <td>Unregister a singleton instance. Throws <code>ArgumentException</code> if the instance is not registered or was not added manually.</td>
+          </tr>
+          <tr>
+            <td><span class="t">void</span> <span class="mn">Remove</span>&lt;<span class="t">T</span>&gt;(<span class="t">IEnumerable&lt;T&gt;</span> singletons) <span class="kw">where</span> T : <span class="kw">class</span></td>
+            <td>Unregister multiple singleton instances. Throws <code>ArgumentNullException</code> if the collection is null.</td>
+          </tr>
+          <tr>
+            <td><span class="t">void</span> <span class="mn">Remove</span>&lt;<span class="t">T</span>&gt;(<span class="kw">params</span> <span class="t">T[]</span> singletons) <span class="kw">where</span> T : <span class="kw">class</span></td>
+            <td>Unregister multiple singleton instances via params.</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════ Singleton<T> ═══ -->
+    <div class="type-section" id="SingletonT">
+      <div class="type-header">
+        <h2>Singleton&lt;T&gt;</h2>
+        <span class="badge badge-static">static class</span>
+      </div>
+      <p class="type-desc">
+        Generic access class for singleton instances. <code>T</code> can be a concrete type, a
+        base class, or an interface. <code>Instances</code> returns every registered object
+        assignable to <code>T</code>, while <code>Instance</code> returns the one selected by a
+        <code>SelectInstance</code> call (or the only one if there is exactly one registered
+        instance of exact type <code>T</code>). All members require play mode; in the editor,
+        accessing them outside play mode throws <code>InvalidOperationException</code>.
+      </p>
+      <div class="note">
+        Constraint: <code>T : class</code>.
+      </div>
+
+      <div class="member-group">
+        <div class="member-group-title">Static Properties</div>
+        <table class="mt">
+          <tr>
+            <td><span class="t">T</span> <span class="mn">Instance</span></td>
+            <td>The selected singleton instance. In the editor, throws <code>InvalidOperationException</code> if no instance is registered or if multiple are registered and none was selected via <code>SelectInstance</code>. Returns <code>null</code> in builds when no instance is available.</td>
+          </tr>
+          <tr>
+            <td><span class="t">IReadOnlyList&lt;T&gt;</span> <span class="mn">Instances</span></td>
+            <td>All registered singleton instances assignable to <code>T</code>, regardless of which one is selected.</td>
+          </tr>
+          <tr>
+            <td><span class="t">bool</span> <span class="mn">HasInstance</span></td>
+            <td>True if <code>Instance</code> has a value. Use this to check before accessing <code>Instance</code> to avoid an exception.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="member-group">
+        <div class="member-group-title">Static Methods: Access</div>
+        <table class="mt">
+          <tr>
+            <td><span class="t">bool</span> <span class="mn">TryGetInstance</span>(<span class="kw">out</span> <span class="t">T</span> instance)</td>
+            <td>Non-throwing alternative to <code>Instance</code>. Sets <code>instance</code> to the selected singleton and returns true; sets it to <code>null</code> and returns false if none is selected.</td>
+          </tr>
+          <tr>
+            <td><span class="t">T[]</span> <span class="mn">Find</span>(<span class="t">Predicate&lt;T&gt;</span> predicate)</td>
+            <td>Return a new array of all registered instances that match the predicate. Returns an empty array if none match.</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="member-group">
+        <div class="member-group-title">Static Methods: SelectInstance</div>
+        <div class="note">
+          All <code>SelectInstance</code> overloads set <code>Instance</code> to a chosen entry
+          from <code>Instances</code> and return <code>true</code> on success. On failure they
+          leave <code>Instance</code> unchanged, log a warning in the editor, and return
+          <code>false</code>.
+        </div>
+        <table class="mt">
+          <tr>
+            <td><span class="t">bool</span> <span class="mn">SelectInstance</span>(<span class="t">Predicate&lt;T&gt;</span> predicate)</td>
+            <td>Select the unique instance matching the predicate. Fails if zero or more than one instance matches.</td>
+          </tr>
+          <tr>
+            <td><span class="t">bool</span> <span class="mn">SelectInstance</span>(<span class="t">Func&lt;T, int&gt;</span> priority)</td>
+            <td>Select the instance with the highest int priority score. Fails if multiple instances share the top score.</td>
+          </tr>
+          <tr>
+            <td><span class="t">bool</span> <span class="mn">SelectInstance</span>(<span class="t">Func&lt;T, float&gt;</span> priority)</td>
+            <td>Select the instance with the highest float priority score. Fails if multiple instances share the top score.</td>
+          </tr>
+          <tr>
+            <td><span class="t">bool</span> <span class="mn">SelectInstance</span>(<span class="t">T</span> instance)</td>
+            <td>Select the given instance directly. Fails if it is not in the registered collection.</td>
+          </tr>
+          <tr>
+            <td><span class="t">bool</span> <span class="mn">SelectInstance</span>&lt;<span class="t">SubT</span>&gt;() <span class="kw">where</span> SubT : T</td>
+            <td>Select the registered instance whose exact runtime type is <code>SubT</code>. Fails if none is found.</td>
+          </tr>
+          <tr>
+            <td><span class="t">bool</span> <span class="mn">SelectInstance</span>()</td>
+            <td>Select the sole registered instance derived from <code>T</code>. Fails if there are zero or more than one.</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

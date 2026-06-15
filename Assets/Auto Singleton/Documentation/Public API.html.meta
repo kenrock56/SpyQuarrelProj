@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 2ec3559c57638cb46ba293b91a106c21
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 264895
+  packageName: Auto Singleton
+  packageVersion: 1.2.0
+  assetPath: Assets/Auto Singleton/Documentation/Public API.html
+  uploadId: 927172

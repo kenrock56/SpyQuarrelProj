@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9284bd2d29797d44da4c8a6ae1b88afc
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 264895
+  packageName: Auto Singleton
+  packageVersion: 1.2.0
+  assetPath: Assets/Auto Singleton/Documentation/img/debug_mode
+  uploadId: 927172

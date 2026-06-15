@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto Singleton - Documentation</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="layout">
+
+  <!-- ─── Sidebar navigation ─── -->
+  <nav>
+    <div class="nav-title">Auto Singleton</div>
+    <a href="#namespace">Namespace</a>
+    <a href="#auto-create">Auto-creating a Singleton</a>
+    <a href="#auto-basic"    class="indent">Basic</a>
+    <a href="#auto-advanced" class="indent">Advanced</a>
+    <a href="#retrieving">Retrieving a Singleton</a>
+    <a href="#single"        class="indent">Single Instance</a>
+    <a href="#multiple"      class="indent">Multiple Instances</a>
+    <a href="#selecting"     class="indent">Selecting an Instance</a>
+    <a href="#find"          class="indent">Find Method</a>
+    <a href="#manual">Manually Creating a Singleton</a>
+    <a href="#manual-methods" class="indent">Add &amp; Remove</a>
+    <a href="#top-bar">Top Bar Menu</a>
+    <a href="#demo">Demo</a>
+    <a href="#troubleshoot">Troubleshooting</a>
+    <a href="#cache"         class="indent">Caching References</a>
+    <a href="#corrupted"     class="indent">Corrupted Singleton List</a>
+    <a href="#contact">Author &amp; Contact</a>
+  </nav>
+
+  <!-- ─── Main content ─── -->
+  <main>
+    <div class="page-header">
+      <h1>Documentation</h1>
+      <div class="version">Auto Singleton v1.2.0</div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════ Namespace ════ -->
+    <section id="namespace">
+      <h2>Namespace</h2>
+      <p>
+        All Auto Singleton classes are in the <strong>AutoSingleton</strong> namespace.
+        Add this at the top of your scripts to access them:
+      </p>
+      <pre><code><span class="kw">using</span> AutoSingleton;</code></pre>
+    </section>
+
+
+    <!-- ══════════════════════════════ Auto-creating a Singleton ════ -->
+    <section id="auto-create">
+      <h2>Automatically Creating a Singleton</h2>
+
+      <h3 id="auto-basic">Basic</h3>
+      <p>
+        Add the <code>[Singleton]</code> attribute to any class derived from
+        <code>MonoBehaviour</code> or <code>ScriptableObject</code>:
+      </p>
+      <pre><code>[<span class="ty">Singleton</span>]
+<span class="kw">public class</span> <span class="ty">ExampleMB</span> : MonoBehaviour { ... }
+
+[<span class="ty">Singleton</span>]
+<span class="kw">public class</span> <span class="ty">ExampleSO</span> : ScriptableObject { ... }</code></pre>
+      <p>
+        An instance is created automatically in the project <strong>Assets</strong> folder,
+        under a <strong>Singleton</strong> directory organized by type.
+      </p>
+
+      <div class="img-block">
+        <img src="img/singleton_folder" alt="Project window showing auto-created singleton folder structure"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <div class="img-placeholder" style="display:none">
+          <span class="icon">🖼</span>
+          <span><strong>img/singleton_folder</strong><br/>Project window showing the auto-created singleton folder structure</span>
+        </div>
+        <div class="img-caption">Auto-created singleton assets in the Project window</div>
+      </div>
+
+      <p>
+        You can freely rename, move, and modify the asset. If you delete the singleton component
+        from a prefab, a new one will be recreated on the next refresh.
+      </p>
+
+      <h3 id="auto-advanced">Advanced</h3>
+      <p>The <code>[Singleton]</code> attribute exposes three optional fields:</p>
+      <pre><code>[<span class="ty">Singleton</span>(
+    inherited = <span class="kw">true</span>,
+    displayName = <span class="st">"Example Display Name"</span>,
+    folderPath = <span class="st">"Folder/SubFolder"</span>
+)]
+<span class="kw">public class</span> <span class="ty">ExampleMB</span> : MonoBehaviour { ... }</code></pre>
+      <ul>
+        <li>
+          <strong>inherited</strong> - If true, the attribute also applies to any class derived
+          from the decorated type.
+        </li>
+        <li>
+          <strong>displayName</strong> - The name the singleton asset will have in the Assets
+          folder. Not inherited by derived classes.
+        </li>
+        <li>
+          <strong>folderPath</strong> - Where to create the singleton asset, relative to
+          <code>Assets/</code>. Inherited by derived classes when <code>inherited</code> is true.
+        </li>
+      </ul>
+    </section>
+
+
+    <!-- ══════════════════════════════ Retrieving a Singleton ════ -->
+    <section id="retrieving">
+      <h2>Retrieving a Singleton</h2>
+
+      <h3 id="single">Single Instance</h3>
+      <p>
+        Access a singleton from any script using the <code>Instance</code> property of
+        <code>Singleton&lt;T&gt;</code>:
+      </p>
+      <pre><code><span class="ty">ExampleMB</span> instance = <span class="ty">Singleton</span>&lt;<span class="ty">ExampleMB</span>&gt;.Instance;</code></pre>
+
+      <h3 id="multiple">Multiple Instances</h3>
+      <p>
+        Use <code>Instances</code> to get all registered singletons assignable to a type.
+        <code>T</code> can be a base class or an interface:
+      </p>
+      <pre><code><span class="cm">// All singletons derived from ParentMB</span>
+IReadOnlyList&lt;<span class="ty">ParentMB</span>&gt; allMBs = <span class="ty">Singleton</span>&lt;<span class="ty">ParentMB</span>&gt;.Instances;
+
+<span class="cm">// All singletons implementing IInterface</span>
+IReadOnlyList&lt;<span class="ty">IInterface</span>&gt; allImpl = <span class="ty">Singleton</span>&lt;<span class="ty">IInterface</span>&gt;.Instances;</code></pre>
+
+      <h3 id="selecting">Selecting an Instance</h3>
+      <p>
+        When multiple singletons are assignable to <code>T</code>, accessing
+        <code>Instance</code> directly throws an exception in the editor. Call
+        <code>SelectInstance</code> first to designate which one to use. All scripts that call
+        <code>Instance</code> afterwards get the selected one:
+      </p>
+      <pre><code><span class="cm">// In one script, pick which instance to use:</span>
+<span class="ty">Singleton</span>&lt;<span class="ty">ParentMB</span>&gt;.SelectInstance((pmb) =&gt; pmb.enabled);
+
+<span class="cm">// In any other script, use Instance normally:</span>
+<span class="ty">Singleton</span>&lt;<span class="ty">ParentMB</span>&gt;.Instance.DoSomething();</code></pre>
+      <p>
+        See the <a href="Public API.html">Public API</a> for all <code>SelectInstance</code>
+        overloads (predicate, priority function, direct instance, type parameter, and no-arg).
+      </p>
+
+      <h3 id="find">Find Method</h3>
+      <p>
+        <code>Find</code> returns every registered singleton matching a predicate as a new array.
+        Cache the result if you need it more than once.
+      </p>
+      <pre><code><span class="ty">ExampleMB</span>[] matches = <span class="ty">Singleton</span>&lt;<span class="ty">ExampleMB</span>&gt;.Find(
+    (s) =&gt; s.name.StartsWith(<span class="st">"a"</span>));</code></pre>
+    </section>
+
+
+    <!-- ══════════════════════════ Manually Creating a Singleton ════ -->
+    <section id="manual">
+      <h2>Manually Creating a Singleton</h2>
+      <p>
+        For scenarios where you need full control over singleton lifetime, use the
+        <code>Singleton</code> static class to add and remove instances at runtime. This works
+        with <strong>any reference type</strong>, not just <code>MonoBehaviour</code> or
+        <code>ScriptableObject</code>. Singletons registered this way are accessed exactly like
+        automatically managed ones.
+      </p>
+      <div class="note">
+        Adding a <code>MonoBehaviour</code> manually does not reparent it under the Auto Singleton
+        root GameObject, so it will be destroyed on scene load unless you call
+        <code>Object.DontDestroyOnLoad</code> on it yourself.
+      </div>
+
+      <h3 id="manual-methods">Add &amp; Remove</h3>
+      <pre><code><span class="cm">// Register one or more instances</span>
+<span class="ty">Singleton</span>.Add(myInstance);
+<span class="ty">Singleton</span>.Add(instanceA, instanceB, instanceC);
+
+<span class="cm">// Unregister a previously added instance</span>
+<span class="ty">Singleton</span>.Remove(myInstance);</code></pre>
+      <ul>
+        <li>
+          <code>Add</code> throws if a singleton of the same exact runtime type is already
+          registered.
+        </li>
+        <li>
+          <code>Remove</code> throws if the instance is not in the list, or if it is managed
+          automatically (not added via <code>Add</code>).
+        </li>
+      </ul>
+    </section>
+
+
+    <!-- ══════════════════════════════════ Top Bar Menu ════ -->
+    <section id="top-bar">
+      <h2>Top Bar Menu</h2>
+      <p>All editor tools are under <strong>Tools &gt; Auto Singleton</strong>:</p>
+
+      <div class="img-block">
+        <img src="img/top_bar_menu" alt="Tools > Auto Singleton menu"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <div class="img-placeholder" style="display:none">
+          <span class="icon">🖼</span>
+          <span><strong>img/top_bar_menu</strong><br/>Tools &gt; Auto Singleton menu with Options submenu</span>
+        </div>
+        <div class="img-caption">Tools &gt; Auto Singleton menu</div>
+      </div>
+
+      <h4>Options / Automatic Refresh</h4>
+      <p>
+        When enabled, singletons are created and deleted automatically after every successful
+        compilation.
+      </p>
+
+      <h4>Options / Log Changes</h4>
+      <p>When enabled, every singleton creation and deletion is logged to the console.</p>
+
+      <h4>Options / Project Icons</h4>
+      <p>
+        When enabled, singleton instances display a custom icon in the Project (Assets) window.
+      </p>
+
+      <h4>Force Refresh</h4>
+      <p>
+        Manually trigger singleton creation and deletion according to the current
+        <code>[Singleton]</code> attribute usage. Has no effect when there are compilation errors.
+      </p>
+
+      <h4>Auto Singleton List</h4>
+      <p>
+        Selects the singleton list asset in the inspector. From there you can see all registered
+        singletons and toggle each one on or off to prevent it from being instantiated at runtime.
+      </p>
+
+      <div class="img-block">
+        <img src="img/singleton_list" alt="Singleton List inspector"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <div class="img-placeholder" style="display:none">
+          <span class="icon">🖼</span>
+          <span><strong>img/singleton_list</strong><br/>Singleton List inspector with enable/disable checkboxes</span>
+        </div>
+        <div class="img-caption">Singleton List inspector</div>
+      </div>
+
+      <h4>Documentation</h4>
+      <p>Opens this documentation.</p>
+    </section>
+
+
+    <!-- ════════════════════════════════════════ Demo ════ -->
+    <section id="demo">
+      <h2>Demo</h2>
+      <p>
+        The package ships with a Tic Tac Toe game built with an MVC pattern. It demonstrates
+        5 singletons across different types: MonoBehaviour, ScriptableObject, and a plain class.
+        Explore it to see the tool used in varied real-world scenarios.
+      </p>
+      <p>
+        Delete the <strong>Demo</strong> folder once you are done to avoid instantiating
+        unnecessary singletons and to remove unused assets from your project.
+      </p>
+    </section>
+
+
+    <!-- ══════════════════════════════════ Troubleshooting ════ -->
+    <section id="troubleshoot">
+      <h2>Troubleshooting</h2>
+
+      <h3 id="cache">Caching a Singleton Reference from Another One</h3>
+      <p>
+        If you store a singleton reference in a field of another automatically managed
+        <code>MonoBehaviour</code> singleton, do <strong>not</strong> fetch it in
+        <code>Awake</code>. Use <code>Start</code> instead; at <code>Awake</code> time other
+        singletons may not yet be instantiated.
+      </p>
+      <pre><code>[<span class="ty">Singleton</span>]
+<span class="kw">class</span> <span class="ty">MySingleton</span> : MonoBehaviour
+{
+    <span class="ty">AnotherSingleton</span> anotherSingleton;
+
+    <span class="kw">void</span> Start() <span class="cm">// Do not do this in Awake.</span>
+    {
+        anotherSingleton = <span class="ty">Singleton</span>&lt;<span class="ty">AnotherSingleton</span>&gt;.Instance;
+    }
+}</code></pre>
+      <div class="note">
+        Caching is rarely worth the effort: <code>Singleton&lt;T&gt;.Instance</code> is already
+        as optimized as a field read at runtime.
+      </div>
+
+      <h3 id="corrupted">Corrupted Singleton List</h3>
+      <p>
+        If the singleton list asset is modified externally (from Unity or outside of it), it may
+        no longer reference the correct assets. When this happens, Auto Singleton repopulates it
+        with freshly created assets, potentially replacing your existing data.
+      </p>
+      <p>
+        To recover, open the singleton list asset in the inspector in <strong>Debug</strong> mode
+        and reassign the asset references manually. Switch to Debug mode by clicking the three-dot
+        menu in the top-right corner of the inspector and selecting <strong>Debug</strong>.
+      </p>
+
+      <div class="img-block">
+        <img src="img/debug_mode" alt="Inspector debug mode dropdown"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <div class="img-placeholder" style="display:none">
+          <span class="icon">🖼</span>
+          <span><strong>img/debug_mode</strong><br/>Inspector three-dot menu with the Debug option</span>
+        </div>
+        <div class="img-caption">Switching the inspector to Debug mode</div>
+      </div>
+    </section>
+
+
+    <!-- ════════════════════════════ Author &amp; Contact ════ -->
+    <section id="contact">
+      <h2>Author &amp; Contact</h2>
+      <p>Created by <strong>Juste Tools</strong>.</p>
+      <ul>
+        <li>Contact: <a href="mailto:justetools@gmail.com">justetools@gmail.com</a></li>
+        <li>Other assets: <a href="https://assetstore.unity.com/publishers/52427">assetstore.unity.com/publishers/52427</a></li>
+      </ul>
+      <p>
+        If you enjoy Auto Singleton, please consider leaving a review on the Asset Store.
+        Your feedback helps improve the tool!
+      </p>
+    </section>
+
+  </main>
+</div>
+</body>
+</html>

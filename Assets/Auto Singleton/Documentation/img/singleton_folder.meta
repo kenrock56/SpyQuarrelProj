@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f6aa33c3d32efda45ab1778cdc2e386d
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 264895
+  packageName: Auto Singleton
+  packageVersion: 1.2.0
+  assetPath: Assets/Auto Singleton/Documentation/img/singleton_folder
+  uploadId: 927172

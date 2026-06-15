@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 3742700260c31b7429760cdf4e59313f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 264895
+  packageName: Auto Singleton
+  packageVersion: 1.2.0
+  assetPath: Assets/Auto Singleton/Editor/Core/MonoBehaviourProcessor.cs
+  uploadId: 927172
