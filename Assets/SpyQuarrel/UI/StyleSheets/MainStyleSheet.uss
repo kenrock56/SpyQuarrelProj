@@ -36,7 +36,7 @@
 }
 
 .menu-panel {
-    width: 40%;
+    width: 49%;
     margin-left: 40px;
     justify-content: flex-start;
     align-items: flex-start;
@@ -52,7 +52,7 @@
     border-right-color: transparent;
     border-top-color: transparent;
     border-bottom-color: transparent;
-    font-size: 50px;
+    font-size: 495%;
     color: white;
     unity-text-align: upper-left;
     transition-duration: 0.2s;

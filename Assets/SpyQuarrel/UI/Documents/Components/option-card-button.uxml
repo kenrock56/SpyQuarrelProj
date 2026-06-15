@@ -1,0 +1,9 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Button name="option-card-button" style="width: 20%; height: 60%; position: absolute; min-width: 20%; min-height: 60%; max-width: 25%; max-height: 85%;">
+        <ui:VisualElement name="top" style="flex-grow: 1; border-top-width: 9px; border-right-width: 9px; border-bottom-width: 9px; border-left-width: 9px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); height: 100%;" />
+        <ui:VisualElement name="bottom" style="flex-grow: 1; justify-content: center; height: 90%;">
+            <ui:Label text="Play" name="option-card-name" style="font-size: 51px;" />
+            <ui:Label text="Play as a Host" name="option-card-description" style="font-size: 39px;" />
+        </ui:VisualElement>
+    </ui:Button>
+</ui:UXML>
