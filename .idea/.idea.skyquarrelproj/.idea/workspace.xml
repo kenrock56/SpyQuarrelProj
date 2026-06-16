@@ -5,18 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cc6078b2-80d0-4870-b36d-46201c1529a1" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/AddressableAssetsData/AddressableAssetSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/AddressableAssetsData/AddressableAssetSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Auto Singleton List.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Auto Singleton List.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.skyquarrelproj/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.skyquarrelproj/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Scenes/SampleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Scenes/SampleScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Sessions/SessionManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Sessions/SessionManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/SpyQuarrelRuntime.asmdef" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/SpyQuarrelRuntime.asmdef" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/UI/Components/OptionCard.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/UI/Components/OptionCard.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/UI/Documents/Components/option-card-button.uxml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/UI/Documents/Components/option-card-button.uxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/UI/Documents/Pages/PlayOptionMenu.uxml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/UI/Documents/Pages/PlayOptionMenu.uxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/UI/Themes/SpyQuarrelTheme.tss" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/UI/Themes/SpyQuarrelTheme.tss" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Packages/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/manifest.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/packages-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/ShaderGraphSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ShaderGraphSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/MultiplayerManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/MultiplayerManager.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,6 +21,10 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/UI/Pages/OptionsPageElement.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo"><![CDATA[{
   "customColor": "",
   "associatedIndex": 4
@@ -108,13 +107,14 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1781566167834</updated>
-      <workItem from="1781566171030" duration="5017000" />
+      <workItem from="1781566171030" duration="9214000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
   <component name="UnityProjectConfiguration" hasMinimizedUI="true" />
   <component name="UnityProjectDiscoverer">
     <option name="hasUnityReference" value="true" />
