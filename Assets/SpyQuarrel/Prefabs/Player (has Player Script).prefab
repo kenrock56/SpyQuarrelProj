@@ -261,7 +261,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1806580670
+  GlobalObjectIdHash: 3966632104
   InScenePlacedSourceGlobalObjectIdHash: 3966632104
   DeferredDespawnTick: 0
   Ownership: 1
@@ -314,6 +314,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c1679f0fdf2f5649937b8be14e3ccf5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _inputRef: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   _moveInput: {x: 0, y: 0}
   _lookInput: {x: 0, y: 0}
   _tryToJump: 0

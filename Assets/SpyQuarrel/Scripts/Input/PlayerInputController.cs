@@ -15,7 +15,8 @@ namespace SpyQuarrelRuntime
 
         public bool FirePressed => _playerInputActions.Player.Attack.WasPressedThisFrame();
         public bool FireHeld => _playerInputActions.Player.Attack.IsPressed();
-
+        
+        
         [SerializeField] private Vector2 _moveInput = Vector2.zero;
         [SerializeField] private Vector2 _lookInput = Vector2.zero;
         [SerializeField] private bool _tryToJump = false;

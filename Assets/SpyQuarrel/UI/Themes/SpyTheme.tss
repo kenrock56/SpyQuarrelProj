@@ -1,0 +1,8 @@
+@import url("UnityDefaultRuntimeTheme.tss");
+
+@import url("/Assets/SpyQuarrel/UI/StyleSheets/OptionCardStyle.uss");
+@import url("/Assets/SpyQuarrel/UI/StyleSheets/MainStyleSheet.uss");
+@import url("/Assets/SpyQuarrel/UI/StyleSheets/RootStyle.uss");
+
+
+VisualElement {}

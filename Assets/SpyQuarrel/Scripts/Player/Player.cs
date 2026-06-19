@@ -27,20 +27,20 @@ namespace SpyQuarrelRuntime
         private Queue<PlayerInputPayload> _serverInputQueue;
 
 #if UNITY_EDITOR
-        [SerializeField] private GameObject _clientCapsule;
-        [SerializeField] private GameObject _serverCapsule;
+        //[SerializeField] private GameObject _clientCapsule;
+        //[SerializeField] private GameObject _serverCapsule;
 #endif
 
         private void Awake()
         {
 #if UNITY_EDITOR
-            _serverCapsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            if (_serverCapsule.TryGetComponent(out CapsuleCollider col))
-                col.enabled = false;
-
-            _clientCapsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            if (_clientCapsule.TryGetComponent(out CapsuleCollider col2))
-                col2.enabled = false;
+            // _serverCapsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            // if (_serverCapsule.TryGetComponent(out CapsuleCollider col))
+            //     col.enabled = false;
+            //
+            // _clientCapsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            // if (_clientCapsule.TryGetComponent(out CapsuleCollider col2))
+            //     col2.enabled = false;
 #endif
 
             if (_inputController == null)
@@ -110,6 +110,7 @@ namespace SpyQuarrelRuntime
 
             SetLayerInChildren("Self");
         }
+        
 
         private void DisableLocalItems()
         {
@@ -185,7 +186,7 @@ namespace SpyQuarrelRuntime
                 }
 
 #if UNITY_EDITOR
-                _serverCapsule.transform.position = statePayload.Position;
+                //_serverCapsule.transform.position = statePayload.Position;
 #endif
                 _serverStateBuffer[bufferIndex] = statePayload;
 
@@ -232,10 +233,10 @@ namespace SpyQuarrelRuntime
              
                 PlayerStatePayload statePayload = ProcessMovement(input);
 
-                _serverStateBuffer[bufferIndex] = statePayload;
+                //_serverStateBuffer[bufferIndex] = statePayload;
 
 #if UNITY_EDITOR
-                _clientCapsule.transform.position = statePayload.Position;
+                //_clientCapsule.transform.position = statePayload.Position;
 #endif
                 _clientStateBuffer[bufferIndex] = statePayload;
 
@@ -254,7 +255,7 @@ namespace SpyQuarrelRuntime
                 PlayerStatePayload statePayload = ProcessMovement(input);
 
 #if UNITY_EDITOR
-                _clientCapsule.transform.position = statePayload.Position;
+                //_clientCapsule.transform.position = statePayload.Position;
 #endif
                 _clientStateBuffer[bufferIndex] = statePayload;
 

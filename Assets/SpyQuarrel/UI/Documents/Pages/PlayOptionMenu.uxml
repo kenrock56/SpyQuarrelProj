@@ -2,15 +2,12 @@
     <Style src="project://database/Assets/SpyQuarrel/UI/StyleSheets/MainStyleSheet.uss?fileID=7433441132597879392&amp;guid=18de11311835f004a856d7a67e127b74&amp;type=3#MainStyleSheet" />
     <ui:VisualElement name="root" class="root">
         <ui:VisualElement name="top-bar" class="top-bar" style="height: 15%;">
-            <ui:VisualElement name="logo-area" class="logo-area">
+            <ui:VisualElement name="logo-area" class="logo-area" style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;">
                 <ui:Label text="SpyQuarrel" class="logo-text" />
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="menu-area" class="menu-area" style="height: 70%; -unity-text-align: middle-left; align-items: center; padding-top: 22px; padding-right: 22px; padding-bottom: 22px; padding-left: 22px; justify-content: space-around;">
-            <SpyQuarrelRuntime.OptionCardElement title="Start as host" description="Start a Game as client. (Local)" style="width: 20%; height: 73%;" />
-            <SpyQuarrelRuntime.OptionCardElement title="Start as Client" description="Join a Game as client (Local)" style="width: 20%; height: 73%;" />
-            <SpyQuarrelRuntime.OptionCardElement title="Create Session" description="Create a game session" style="width: 20%; height: 73%;" />
-            <SpyQuarrelRuntime.OptionCardElement title="Join Session" description="Join a game session" style="width: 20%; height: 73%;" />
+            <ui:VisualElement name="button-container" style="flex-grow: 1; height: 100%; flex-direction: row; justify-content: space-around; flex-wrap: wrap; align-content: stretch;" />
         </ui:VisualElement>
         <ui:VisualElement name="bottom" class="bottom" />
     </ui:VisualElement>

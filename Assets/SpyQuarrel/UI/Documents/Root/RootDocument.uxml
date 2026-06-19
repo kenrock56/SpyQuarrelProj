@@ -1,6 +1,7 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/SpyQuarrel/UI/StyleSheets/RootStyle.uss?fileID=7433441132597879392&amp;guid=a4c8011a69c8eb946a199246f09b93e6&amp;type=3#RootStyle" />
     <ui:VisualElement name="root" style="flex-grow: 1; width: 100%; height: 100%;">
-        <SpyQuarrelRuntime.StartMenuElement class="fullscreen-page" />
+        <SpyQuarrelRuntime.StartMenuElement class="fullscreen-page" style="display: none;" />
+        <SpyQuarrelRuntime.OptionsPageElement name="OptionsPageElement" />
     </ui:VisualElement>
 </ui:UXML>

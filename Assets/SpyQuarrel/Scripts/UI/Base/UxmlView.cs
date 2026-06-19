@@ -16,7 +16,7 @@ public abstract class UxmlView : VisualElement
 
     public VisualElement RootElement => _rootElement;
     protected VisualElement _rootElement;
-    
+
     protected UxmlView()
     {
         RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
@@ -101,16 +101,17 @@ public abstract class UxmlView : VisualElement
     {
     }
 
-    protected T GetElement<T>(string name) where T : VisualElement
+    protected T GetElement<T>(string elementName) where T : VisualElement
     {
-        var ele = this.Q<T>(name);
+        var ele = this.Q<T>(elementName);
         
         if (ele == null)
-            Debug.LogError($"Failed to find element: {name}");
+            Debug.LogError($"Failed to find element: {elementName}");
         
-        return this.Q<T>(name);
+        return this.Q<T>(elementName);
     }
-
+    
+    
     public void Show()
     {
         style.display = DisplayStyle.Flex;

@@ -1,13 +1,13 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/SpyQuarrel/UI/StyleSheets/OptionCardStyle.uss?fileID=7433441132597879392&amp;guid=36059d7e869dc9f41b15ef9d9a4f00f2&amp;type=3#OptionCardStyle" />
-    <ui:VisualElement name="option-card-button" class="option-root">
+    <ui:VisualElement name="option-card-button" focusable="true" class="option-root" style="flex-shrink: 1;">
         <ui:VisualElement name="top-side" class="option-top">
             <ui:VisualElement name="image-display" class="option-image" />
         </ui:VisualElement>
         <ui:VisualElement name="bottom-side" class="option-bottom">
             <ui:Label name="option-main-label" text="Host" class="option-title" />
             <ui:VisualElement name="text-container" class="option-description-container">
-                <ui:Label text="Host a game session" name="description-label" class="option-description" />
+                <ui:Label name="description-label" text="Host a game session" class="option-description" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
