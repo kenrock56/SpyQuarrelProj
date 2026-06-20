@@ -6009,13 +6009,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Visible: 1
-  m_MaxRefreshRate: 30
+  m_MaxRefreshRate: 60
   <CustomStyleSheet>k__BackingField: {fileID: 4413694071827464959, guid: 82aa9752ec29e6443afe7db320c7bd70, type: 3}
   <PanelSettingsOverride>k__BackingField: {fileID: 11400000, guid: 6976ea5ddd472b0488e24752d27ceda8, type: 2}
   <Position>k__BackingField:
     <OverridePosition>k__BackingField: 1
-    m_PositionLeftToRight: 0
-    m_PositionTopToBottom: 0
+    m_PositionLeftToRight: 0.5
+    m_PositionTopToBottom: 0.5
   <Configuration>k__BackingField: {fileID: 11400000, guid: 8f1b4e3792d8446399527749cfb591a2, type: 2}
 --- !u!4 &800216478
 Transform:
@@ -13712,6 +13712,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1647348978}
   - component: {fileID: 1647348977}
+  - component: {fileID: 1647348979}
   m_Layer: 5
   m_Name: MainDoc
   m_TagString: Untagged
@@ -13753,6 +13754,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1647348979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1647348976}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb884bd3af1750d4189449e74b5cb483, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1650845369
 GameObject:
   m_ObjectHideFlags: 0

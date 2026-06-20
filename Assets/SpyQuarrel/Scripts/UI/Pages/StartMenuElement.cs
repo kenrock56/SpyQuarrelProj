@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 namespace SpyQuarrelRuntime
 {
     [UxmlElement]
-    public partial class StartMenuElement : UxmlView
+    public partial class StartMenuElement : PageView
     { 
         protected override string AssetPath => "StartMenu";
         
