@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoSingleton;
 using Unity.Services.Core;
@@ -13,6 +14,10 @@ namespace SpyQuarrelRuntime
     [Singleton]
     public class SessionManager : MonoBehaviour
     {
+        
+        public static SessionManager Instance => Singleton<SessionManager>.Instance;
+        public static bool HasInstance => Singleton<SessionManager>.HasInstance;
+        
         [SerializeReference]private ISession _currentSession;
 
         
@@ -107,6 +112,27 @@ namespace SpyQuarrelRuntime
             CurrentSession = await MultiplayerService.Instance.JoinSessionByCodeAsync(code);
             RegisterCallbacks();
             Debug.Log($"Joined session: {CurrentSession.Id}. {CurrentSession.Code}");
+        }
+
+        public async void QuickJoinSession()
+        {
+
+            QuerySessionsOptions sessionOptions = new QuerySessionsOptions()
+            {
+
+            };
+
+            var sessions = await MultiplayerService.Instance.QuerySessionsAsync(sessionOptions);
+
+            if (sessions.Sessions.Count > 0)
+            {
+                CurrentSession = await MultiplayerService.Instance.JoinSessionByIdAsync(sessions.Sessions[0].Id);
+            }
+            else
+            {
+                Debug.LogWarning("No active sessions");
+            }
+
         }
 
         public async Task KickPlayer(string playerId)

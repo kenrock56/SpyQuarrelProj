@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using SpyQuarrelRuntime;
 using Unity.Properties;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -133,6 +134,8 @@ public abstract class UxmlView : VisualElement
 
 public abstract class PageView : UxmlView
 {
+    
+    
     protected PageView()
     {
         Debug.Log($"{this.GetType().Name} Constructor called at {Time.time}");
@@ -153,6 +156,23 @@ public abstract class PageView : UxmlView
         style.flexShrink = 1f;
         
         Debug.Log($"{this.GetType().Name}  Constructor finished at {Time.time}");
+    }
+    
+}
+public abstract class MenuPageView : PageView, IBindablePageElement
+{
+    public abstract MenuPages MenuPageDefinition { get; }
+    public MainUIController MainUIController => _mainUIController;
+    private MainUIController _mainUIController;
+    
+    protected MenuPageView() : base()
+    {
+
+    }
+
+    public void BindToController(MainUIController controller)
+    {
+        _mainUIController = controller;
     }
 }
 

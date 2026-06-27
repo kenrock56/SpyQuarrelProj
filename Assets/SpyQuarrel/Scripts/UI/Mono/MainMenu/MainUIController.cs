@@ -9,28 +9,146 @@ namespace SpyQuarrelRuntime
     public class MainUIController : MonoBehaviour
     {
         private UIDocument _document;
-        
         private VisualElement _root;
-        
-        private List<PageView> _menuPages;
-        
-        void Awake()
+
+        private readonly List<MenuPageView> _menuPages = new();
+        public readonly Dictionary<MenuPages, MenuPageView> Pages = new();
+
+        private OptionsPageElement _optionsPage;
+        private StartMenuElement _startMenu;
+
+        [SerializeField]private bool _isInitialized;
+
+        private void Awake()
         {
-            if(!TryGetComponent(out _document))return;
-            
+            if (!TryGetComponent(out _document))
+            {
+                Debug.LogError($"{nameof(MainUIController)} requires a UIDocument component.");
+                enabled = false;
+                return;
+            }
+
             _root = _document.rootVisualElement;
-            
+
+            if (_root == null)
+            {
+                Debug.LogError($"{nameof(MainUIController)} could not find rootVisualElement.");
+                enabled = false;
+            }
         }
 
-        IEnumerator Start()
+        private IEnumerator Start()
         {
-            
-            yield return new WaitForSeconds(1.2f * Time.deltaTime);
-            _menuPages = _root.Query<PageView>().ToList();
+            yield return InitializeElements();
+
+            RegisterPages();
+            BindPages();
+
+            _isInitialized = true;
+
+            Debug.Log("All menu pages initialized.");
+
+            if (_startMenu != null)
+            {
+                GoToPage(_startMenu);
+            }
+        }
+
+        private IEnumerator InitializeElements()
+        {
+            _startMenu = _root.Q<StartMenuElement>();
+            _optionsPage = _root.Q<OptionsPageElement>();
+
+            _menuPages.Clear();
+            _menuPages.AddRange(_root.Query<MenuPageView>().ToList());
+
+            if (_menuPages.Count == 0)
+            {
+                Debug.LogWarning($"{nameof(MainUIController)} found no MenuPageView elements.");
+                yield break;
+            }
+
+            yield return new WaitUntil(AllPagesInitialized);
+        }
+
+        private bool AllPagesInitialized()
+        {
+            for (int i = 0; i < _menuPages.Count; i++)
+            {
+                if (_menuPages[i] == null || !_menuPages[i].IsInitialized)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void RegisterPages()
+        {
+            Pages.Clear();
 
             foreach (var page in _menuPages)
             {
-                Debug.Log(page.name);
+                if (page == null) continue;
+
+                var definition = page.MenuPageDefinition;
+
+                if (Pages.ContainsKey(definition))
+                {
+                    continue;
+                }
+
+                Pages.Add(definition, page);
+            }
+        }
+
+        private void BindPages()
+        {
+            foreach (var page in _menuPages)
+            {
+                page?.BindToController(this);
+            }
+        }
+
+        public void SwitchPage(MenuPages page)
+        {
+            if (!_isInitialized)
+            {
+                return;
+            }
+            
+            if (!Pages.TryGetValue(page, out var element) || element is not { IsInitialized: true } )
+            {
+                return;
+            }
+            
+
+            GoToPage(element);
+        }
+
+        private void GoToPage(MenuPageView targetPage)
+        {
+            if (targetPage == null)
+            {
+                return;
+            }
+
+            foreach (var page in _menuPages)
+            {
+                if (page == null)
+                {
+                    continue;
+                }
+
+                if (page == targetPage)
+                {
+                    page.Show();
+                }
+                else
+                {
+                    page.Hide();
+                }
             }
         }
     }

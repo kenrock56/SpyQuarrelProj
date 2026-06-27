@@ -11291,7 +11291,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PresetAsset: {fileID: 0}
   m_PresetReference:
-    rid: 6901251190608363606
+    rid: 494938091848990806
   m_Scenario:
     rid: 6901251190608363607
   m_IsScenarioSettingsFolded: 1
@@ -11299,7 +11299,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 6901251190608363606
+    - rid: 494938091848990806
       type: {class: NetworkSimulatorPreset, ns: Unity.Multiplayer.Tools.NetworkSimulator.Runtime, asm: Unity.Multiplayer.Tools.NetworkSimulator.Runtime}
       data:
         <Name>k__BackingField: 'Home Broadband [WIFI, Cable, Console, PC]'
@@ -13766,6 +13766,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb884bd3af1750d4189449e74b5cb483, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isInitialized: 0
 --- !u!1 &1650845369
 GameObject:
   m_ObjectHideFlags: 0

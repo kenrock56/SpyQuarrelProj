@@ -5,9 +5,11 @@ using UnityEngine.UIElements;
 namespace SpyQuarrelRuntime
 {
     [UxmlElement]
-    public partial class OptionsPageElement : PageView
+    public partial class OptionsPageElement : MenuPageView
 
-    {
+    { 
+        public override MenuPages MenuPageDefinition => MenuPages.PlayOptions;
+        
         protected override string AssetPath => "PlayOptionMenu";
 
         private VisualElement _buttonContainer;
@@ -28,10 +30,12 @@ namespace SpyQuarrelRuntime
                 _startHostButton = new OptionCardElement("Start Host", "Start a game as host", Texture2D.blackTexture);
                 _startClientButton = new OptionCardElement("Start Client", "Start game as a Client", Texture2D.blackTexture);
                 _createSessionButton = new OptionCardElement("Create Session", "Create a Session", Texture2D.blackTexture);
-                _startServerButton = new OptionCardElement("Start Server", "Start a Server", Texture2D.blackTexture);
+                _startServerButton = new OptionCardElement("Start Server", "Start a Server /// Quick Join for now", Texture2D.blackTexture);
                 
                 _startHostButton.OnClick += StartHost;
                 _startClientButton.OnClick += StartClient;
+                _createSessionButton.OnClick += StartSession;
+                _startServerButton.OnClick += QuickJoinSession;
                 
                 _buttonContainer.Add(_startHostButton);
                 _buttonContainer.Add(_startClientButton);
@@ -45,6 +49,8 @@ namespace SpyQuarrelRuntime
             }
             //_startHostButton = new OptionCardElement();
         }
+
+      
 
         private void StartClient()
         {
@@ -81,6 +87,22 @@ namespace SpyQuarrelRuntime
                 
             }
             
+        }
+        
+        private void StartSession()
+        {
+            if(!Application.isPlaying)return;
+            if(NetworkManager.Singleton == null)return;
+            
+            SessionManager.Instance.StartSessionAsHost();
+        }
+        
+        private void QuickJoinSession()
+        {
+            if(!Application.isPlaying)return;
+            if(NetworkManager.Singleton == null)return;
+            
+            SessionManager.Instance.QuickJoinSession();
         }
 
         private void GetElements()

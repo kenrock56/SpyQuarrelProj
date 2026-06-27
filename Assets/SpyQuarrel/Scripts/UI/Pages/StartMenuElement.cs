@@ -4,8 +4,9 @@ using UnityEngine.UIElements;
 namespace SpyQuarrelRuntime
 {
     [UxmlElement]
-    public partial class StartMenuElement : PageView
-    { 
+    public partial class StartMenuElement : MenuPageView
+    {
+        public override MenuPages MenuPageDefinition => MenuPages.StartMenu;
         protected override string AssetPath => "StartMenu";
         
         private Button _playButton;
@@ -40,6 +41,7 @@ namespace SpyQuarrelRuntime
 
         private void OnPlayButtonClicked()
         {
+            MainUIController.SwitchPage(MenuPages.PlayOptions);
             Debug.Log("Play Button clicked");
         }
 
