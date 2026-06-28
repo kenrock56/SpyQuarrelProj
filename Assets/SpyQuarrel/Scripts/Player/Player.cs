@@ -66,6 +66,7 @@ namespace SpyQuarrelRuntime
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
+
             _networkSuccess = true;
 
             if (_character != null && (IsServer || IsOwner))
@@ -110,7 +111,6 @@ namespace SpyQuarrelRuntime
 
             SetLayerInChildren("Self");
         }
-        
 
         private void DisableLocalItems()
         {
@@ -135,6 +135,7 @@ namespace SpyQuarrelRuntime
         private void Update()
         {
             float deltaTime = Time.deltaTime;
+
             _character.UpdateBody(deltaTime);
 
             if (_networkSuccess && !IsOwner)
@@ -156,7 +157,6 @@ namespace SpyQuarrelRuntime
             }
         }
 
-       
         private void HandleServerTick()
         {
             if (!IsServer) return;
@@ -173,14 +173,12 @@ namespace SpyQuarrelRuntime
 
                 if (IsHost && IsOwner)
                 {
-                    
                     statePayload = _serverStateBuffer[bufferIndex];
                 }
                 else
                 {
                     statePayload = ProcessMovement(input);
 
-                   
                     if (IsHost && !IsOwner)
                         _character.SetPredictedState(statePayload);
                 }
@@ -188,6 +186,7 @@ namespace SpyQuarrelRuntime
 #if UNITY_EDITOR
                 //_serverCapsule.transform.position = statePayload.Position;
 #endif
+
                 _serverStateBuffer[bufferIndex] = statePayload;
 
                 if (!hadInput || input.Tick > lastState.Tick)
@@ -199,17 +198,12 @@ namespace SpyQuarrelRuntime
 
             if (!hadInput) return;
 
-            
             if (IsHost && IsOwner) return;
 
-           
-            SendToClientRpc(lastState);
-
-          
-            SendStateToObserversRpc(lastState);
+            SendToClientRpc(CreateReconciliationStatePayload(lastState));
+            SendStateToObserversRpc(CreateImpliedStatePayload(lastState));
         }
 
-        
         private void HandleClientTick()
         {
             if (!IsClient || !IsOwner) return;
@@ -227,49 +221,42 @@ namespace SpyQuarrelRuntime
 
             if (IsHost)
             {
-               
                 _serverInputQueue.Enqueue(input);
 
-             
                 PlayerStatePayload statePayload = ProcessMovement(input);
-
-                //_serverStateBuffer[bufferIndex] = statePayload;
 
 #if UNITY_EDITOR
                 //_clientCapsule.transform.position = statePayload.Position;
 #endif
+
                 _clientStateBuffer[bufferIndex] = statePayload;
+                _serverStateBuffer[bufferIndex] = statePayload;
 
-                // Update own _lastServerState
-                SendToClientRpc(statePayload);
-
-                // Sync host player position to all observers
-                SendStateToObserversRpc(statePayload);
+                SendToClientRpc(CreateReconciliationStatePayload(statePayload));
+                SendStateToObserversRpc(CreateImpliedStatePayload(statePayload));
             }
             else
             {
-                // Send input to server for authoritative simulation
                 SendToServerRpc(input);
 
-                // Predict locally
                 PlayerStatePayload statePayload = ProcessMovement(input);
 
 #if UNITY_EDITOR
                 //_clientCapsule.transform.position = statePayload.Position;
 #endif
+
                 _clientStateBuffer[bufferIndex] = statePayload;
 
                 HandleServerReconciliation();
             }
         }
 
- 
-        //client player only
         private void HandleServerReconciliation()
         {
             if (!ShouldReconcile()) return;
 
             int bufferIndex = _lastServerState.Tick % _bufferSize;
+
             PlayerStatePayload rewindState = _lastServerState;
             PlayerStatePayload currentState = _clientStateBuffer[bufferIndex];
 
@@ -284,6 +271,7 @@ namespace SpyQuarrelRuntime
         private void ReconcileState(PlayerStatePayload rewindState)
         {
             _character.SetPredictedState(rewindState);
+
             _clientStateBuffer[rewindState.Tick % _bufferSize] = rewindState;
 
             int tickToProcess = rewindState.Tick + 1;
@@ -291,9 +279,12 @@ namespace SpyQuarrelRuntime
             while (tickToProcess < _networkTimer.CurrentTick)
             {
                 int bufferIndex = tickToProcess % _bufferSize;
+
                 PlayerInputPayload inputPayload = _clientInputBuffer[bufferIndex];
                 PlayerStatePayload stateToProcess = ProcessMovement(inputPayload);
+
                 _clientStateBuffer[bufferIndex] = stateToProcess;
+
                 tickToProcess++;
             }
         }
@@ -301,42 +292,54 @@ namespace SpyQuarrelRuntime
         private bool ShouldReconcile()
         {
             bool isNewServerState = !_lastServerState.Equals(default);
-            bool isLastUndefinedOrDifferent = _lastProcessedState.Equals(default)
-                                           || !_lastProcessedState.Equals(_lastServerState);
+
+            bool isLastUndefinedOrDifferent =
+                _lastProcessedState.Equals(default) ||
+                !_lastProcessedState.Equals(_lastServerState);
+
             return isNewServerState && isLastUndefinedOrDifferent;
         }
 
-    
         [Rpc(SendTo.Server)]
         private void SendToServerRpc(PlayerInputPayload input)
         {
             _serverInputQueue.Enqueue(input);
         }
 
-       
         [Rpc(SendTo.Owner)]
-        private void SendToClientRpc(PlayerStatePayload state)
+        private void SendToClientRpc(PlayerReconciliationStatePayload state)
         {
             if (!IsOwner) return;
-            _lastServerState = state;
+
+            _lastServerState = state.ReconcileToFull();
         }
 
-       
         [Rpc(SendTo.NotOwner)]
-        private void SendStateToObserversRpc(PlayerStatePayload state)
+        private void SendStateToObserversRpc(PlayerImpliedStatePayload state)
         {
-            // Server already has state — skip
             if (IsServer) return;
-            _character.SetPredictedState(state);
+
+            _character.SetImpliedState(state);
         }
 
-       
         private PlayerStatePayload ProcessMovement(PlayerInputPayload input)
         {
             var fixeddt = _networkTimer.FixedTickInterval;
+
             _character.UpdateInput(input.Command);
             _simulationBridge.SimulateMotor(_character.Motor, fixeddt);
+
             return _character.GetPredictedState(input.Tick);
+        }
+
+        private PlayerReconciliationStatePayload CreateReconciliationStatePayload(PlayerStatePayload state)
+        {
+            return PlayerReconciliationStatePayload.FromFullState(state);
+        }
+
+        private PlayerImpliedStatePayload CreateImpliedStatePayload(PlayerStatePayload state)
+        {
+            return PlayerImpliedStatePayload.FullToImplied(state);
         }
 
         private PlayerInputCommand GetRequestedMovement()

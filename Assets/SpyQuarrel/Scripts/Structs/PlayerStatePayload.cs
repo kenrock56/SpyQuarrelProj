@@ -30,7 +30,7 @@ namespace SpyQuarrelRuntime
             int tick = Tick;
 
             Vector3 position = Position;
-            Quaternion rotation = Rotation;
+            float yaw = Rotation.eulerAngles.y;
             Vector3 velocity = Velocity;
 
             PlayerState currentState = CurrentState;
@@ -48,7 +48,7 @@ namespace SpyQuarrelRuntime
             serializer.SerializeValue(ref tick);
 
             serializer.SerializeValue(ref position);
-            serializer.SerializeValue(ref rotation);
+            serializer.SerializeValue(ref yaw);
             serializer.SerializeValue(ref velocity);
 
             serializer.SerializeValue(ref currentState);
@@ -66,7 +66,7 @@ namespace SpyQuarrelRuntime
             Tick = tick;
 
             Position = position;
-            Rotation = rotation;
+            Rotation = Quaternion.Euler(0, yaw, 0);
             Velocity = velocity;
 
             CurrentState = currentState;

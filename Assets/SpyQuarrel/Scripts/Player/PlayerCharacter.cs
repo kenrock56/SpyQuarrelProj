@@ -615,6 +615,36 @@ namespace SpyQuarrelRuntime
 
             SwitchStance(_currentState.Stance);
         }
+        
+       
+
+        public void SetImpliedState(PlayerImpliedStatePayload state)
+        {
+            _motor.SetPositionAndRotation(
+                state.Position,
+                Quaternion.Euler(0f, state.Yaw, 0f)
+            );
+
+            _currentState = new PlayerState
+            {
+                Grounded = state.Grounded,
+                Stance = state.Stance,
+                Velocity = state.Velocity
+            };
+
+            _previousState = _currentState;
+
+            _requestedJump = false;
+            _requestedSustainedJump = false;
+            _requestedCrouch = state.Stance != PlayerStance.Standing;
+            _requestedCrouchInAir = false;
+            _jumpHeldLastFrame = false;
+
+            _timeSinceUngrounded = state.Grounded ? 0f : _jumpWindowTime + 1f;
+            _timeSinceJumpRequest = float.PositiveInfinity;
+
+            SwitchStance(_currentState.Stance);
+        }
 
         public void Teleport(Vector3 position)
         {
