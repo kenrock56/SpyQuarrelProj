@@ -2,5 +2,5 @@ using UnityEngine;
 
 namespace SpyQuarrelRuntime
 {
-    public enum MenuPages{None, StartMenu, PlayOptions}
+    public enum MenuPages{None, StartMenu, PlayOptions, RoleSelect}
 }

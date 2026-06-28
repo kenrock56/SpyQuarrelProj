@@ -6014,8 +6014,8 @@ MonoBehaviour:
   <PanelSettingsOverride>k__BackingField: {fileID: 11400000, guid: 6976ea5ddd472b0488e24752d27ceda8, type: 2}
   <Position>k__BackingField:
     <OverridePosition>k__BackingField: 1
-    m_PositionLeftToRight: 0.5
-    m_PositionTopToBottom: 0.5
+    m_PositionLeftToRight: 0.7
+    m_PositionTopToBottom: 1
   <Configuration>k__BackingField: {fileID: 11400000, guid: 8f1b4e3792d8446399527749cfb591a2, type: 2}
 --- !u!4 &800216478
 Transform:
@@ -8193,7 +8193,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 749367733}
-    PlayerPrefab: {fileID: 4471688079244152639, guid: 712631a25269a3849b4af41da3a2e624, type: 3}
+    PlayerPrefab: {fileID: 0}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: 1c591044006d1154e92af39433f9392b, type: 2}
@@ -11291,7 +11291,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PresetAsset: {fileID: 0}
   m_PresetReference:
-    rid: 494938091848990806
+    rid: 494938114513698966
   m_Scenario:
     rid: 6901251190608363607
   m_IsScenarioSettingsFolded: 1
@@ -11299,7 +11299,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 494938091848990806
+    - rid: 494938114513698966
       type: {class: NetworkSimulatorPreset, ns: Unity.Multiplayer.Tools.NetworkSimulator.Runtime, asm: Unity.Multiplayer.Tools.NetworkSimulator.Runtime}
       data:
         <Name>k__BackingField: 'Home Broadband [WIFI, Cable, Console, PC]'

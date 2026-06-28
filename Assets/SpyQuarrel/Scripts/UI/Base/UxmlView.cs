@@ -91,7 +91,7 @@ public abstract class UxmlView : VisualElement
 
     protected virtual VisualElement GetBaseElement(VisualElement root)
     {
-        return null;
+        return root.Q<VisualElement>("root");
     }
 
     protected virtual void OnInitialize()

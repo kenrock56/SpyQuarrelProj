@@ -1,0 +1,13 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/SpyQuarrel/UI/StyleSheets/MainStyleSheet.uss?fileID=7433441132597879392&amp;guid=18de11311835f004a856d7a67e127b74&amp;type=3#MainStyleSheet" />
+    <ui:VisualElement name="root" class="root" style="flex-grow: 1;">
+        <ui:VisualElement name="container" style="flex-grow: 1;">
+            <ui:VisualElement name="inner-border" style="flex-grow: 1; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); border-top-width: 7px; border-right-width: 7px; border-bottom-width: 7px; border-left-width: 7px; border-top-left-radius: 15px; border-top-right-radius: 15px; border-bottom-right-radius: 15px; border-bottom-left-radius: 15px; margin-top: 1%; margin-right: 1%; margin-bottom: 1%; margin-left: 1%;">
+                <ui:VisualElement name="button-container" style="flex-grow: 1; background-color: rgb(10, 0, 0); margin-top: 5%; margin-right: 5%; margin-bottom: 5%; margin-left: 5%; padding-top: 2%; padding-right: 2%; padding-bottom: 2%; padding-left: 2%; font-size: 48px;">
+                    <ui:Button text="Play as Spy" name="spy-select-button" style="flex-grow: 1;" />
+                    <ui:Button text="Play as Sniper" name="sniper-select-button" style="flex-grow: 1;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

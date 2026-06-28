@@ -57,6 +57,8 @@ namespace SpyQuarrelRuntime
             if(!Application.isPlaying)return;
             if(NetworkManager.Singleton == null)return;
             
+            Hide();
+            
             if (NetworkManager.Singleton.StartClient())
             {
                 
@@ -64,6 +66,7 @@ namespace SpyQuarrelRuntime
             else
             {
                 NetworkManager.Singleton.Shutdown();
+                Show();
             }
         }
 
@@ -73,7 +76,7 @@ namespace SpyQuarrelRuntime
 
             if (success)
             {
-                Hide();
+                MainUIController.SwitchPage(MenuPages.RoleSelect);
             }
         }
 
@@ -82,9 +85,15 @@ namespace SpyQuarrelRuntime
             if(!Application.isPlaying)return;
             if(NetworkManager.Singleton == null)return;
             
+            Hide();
+            
             if (NetworkManager.Singleton.StartHost())
             {
                 
+            }
+            else
+            {
+                Show();
             }
             
         }

@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: UIElements
   m_GUID: 1a002691c62626e458ccff408efc764a
   m_SerializeEntries:
+  - m_GUID: 2f3c051440504534a89853be3a008b4c
+    m_Address: RoleSelectPage
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 96b4e733086dd064d9e88dae5486667b
     m_Address: StartMenu
     m_ReadOnly: 0

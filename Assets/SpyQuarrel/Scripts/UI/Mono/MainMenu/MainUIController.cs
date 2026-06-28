@@ -16,6 +16,7 @@ namespace SpyQuarrelRuntime
 
         private OptionsPageElement _optionsPage;
         private StartMenuElement _startMenu;
+        private RoleSelectPageElement _roleSelectPage;
 
         [SerializeField]private bool _isInitialized;
 
@@ -58,6 +59,7 @@ namespace SpyQuarrelRuntime
         {
             _startMenu = _root.Q<StartMenuElement>();
             _optionsPage = _root.Q<OptionsPageElement>();
+            _roleSelectPage = _root.Q<RoleSelectPageElement>();
 
             _menuPages.Clear();
             _menuPages.AddRange(_root.Query<MenuPageView>().ToList());
@@ -99,6 +101,7 @@ namespace SpyQuarrelRuntime
                     continue;
                 }
 
+                Debug.Log($"Registering page {page.name} + {page.MenuPageDefinition}");
                 Pages.Add(definition, page);
             }
         }
