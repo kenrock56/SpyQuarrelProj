@@ -342,6 +342,12 @@ namespace SpyQuarrelRuntime
             return PlayerImpliedStatePayload.FullToImplied(state);
         }
 
+
+        public Transform GetCameraTransform()
+        {
+            return _camera.transform;
+        }
+
         private PlayerInputCommand GetRequestedMovement()
         {
             return new PlayerInputCommand()

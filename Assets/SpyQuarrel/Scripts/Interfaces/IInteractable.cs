@@ -1,9 +1,34 @@
+using System;
 using UnityEngine;
 
-namespace SpyQuarrelRuntime.Interfaces
+namespace SpyQuarrelRuntime
 {
-    public interface IInteractable : IProfile
+    public interface IInteractable
     {
-        void Interact();
+        string InteractName { get; }
+        string InteractDescription { get; }
+
+        bool IsInteractable { get; }
+
+        void OnInteractEnter(Interactor interactor)
+        {
+            Debug.Log("OnInteractEnter");
+        }
+
+        void OnInteractHover(Interactor interactor)
+        {
+            Debug.Log("OnInteractHover");
+        }
+
+        void OnInteractExit(Interactor interactor)
+        {
+            Debug.Log("OnInteractExit");
+        }
+
+        void Interact(Interactor interactor)
+        {
+            Debug.Log("Interact");
+        }
+        
     }
 }

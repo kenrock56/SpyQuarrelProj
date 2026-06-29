@@ -32,7 +32,8 @@ namespace SpyQuarrelRuntime
             _eulerAngles += new Vector3(-input.Look.y * _mouseSensitivity.y, input.Look.x * _mouseSensitivity.x);
             transform.eulerAngles = _eulerAngles;
         }
-
+        
+        
         public void UpdatePosition(Transform target)
         {
             //transform.position = target.position;

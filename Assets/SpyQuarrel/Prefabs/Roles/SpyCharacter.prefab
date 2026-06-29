@@ -226,6 +226,7 @@ GameObject:
   - component: {fileID: 1504003973700539345}
   - component: {fileID: 205327034685397770}
   - component: {fileID: 3893345970940778652}
+  - component: {fileID: 623335927129034837}
   m_Layer: 0
   m_Name: SpyCharacter
   m_TagString: Untagged
@@ -318,6 +319,20 @@ MonoBehaviour:
   _serverStateBuffer:
     _buffer: []
     _bufferSize: 0
+--- !u!114 &623335927129034837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4471688079244152639}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae9c7adc1749df447ac6b9775cd6a59c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _canInteract: 0
+  _interactRange: 1000
 --- !u!1 &4939560541301924350
 GameObject:
   m_ObjectHideFlags: 0

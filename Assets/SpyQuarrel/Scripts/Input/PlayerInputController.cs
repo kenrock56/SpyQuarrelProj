@@ -15,6 +15,9 @@ namespace SpyQuarrelRuntime
 
         public bool FirePressed => _playerInputActions.Player.Attack.WasPressedThisFrame();
         public bool FireHeld => _playerInputActions.Player.Attack.IsPressed();
+
+        public bool InteractHeld => _interactHeld;
+        private bool _interactHeld;
         
         
         [SerializeField] private Vector2 _moveInput = Vector2.zero;
@@ -60,9 +63,23 @@ namespace SpyQuarrelRuntime
             _playerInputActions.Player.Jump.canceled += OnJumpEnd;
 
             _playerInputActions.Player.Crouch.started += OnCrouchStart;
+            
+            _playerInputActions.Player.Interact.started += OnInteractStarted;
+            _playerInputActions.Player.Interact.canceled += OnInteractCancelled;
 
             _playerInputActions.Enable();
         }
+
+        
+        private void OnInteractStarted(InputAction.CallbackContext context)
+        {
+           _interactHeld = true;
+        }
+        private void OnInteractCancelled(InputAction.CallbackContext context)
+        {
+            _interactHeld = false;
+        }
+
 
         private void UnregisterCallbacks()
         {
