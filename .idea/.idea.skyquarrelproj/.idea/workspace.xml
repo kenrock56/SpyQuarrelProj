@@ -6,13 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="cc6078b2-80d0-4870-b36d-46201c1529a1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.skyquarrelproj/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.skyquarrelproj/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Prefabs/Roles/SpyCharacter.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Prefabs/Roles/SpyCharacter.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Scenes/SampleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Scenes/SampleScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Input/PlayerInputController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Input/PlayerInputController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Interfaces/IInteractable.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Interfaces/IInteractable.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Player/Player.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Player/Player.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Player/PlayerCamera.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Player/PlayerCamera.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/MultiplayerManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/MultiplayerManager.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -134,7 +127,7 @@
       <workItem from="1781827107269" duration="4916000" />
       <workItem from="1781835827853" duration="668000" />
       <workItem from="1781913624875" duration="2361000" />
-      <workItem from="1782713578473" duration="2511000" />
+      <workItem from="1782713578473" duration="3127000" />
     </task>
     <servers />
   </component>
