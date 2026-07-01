@@ -6,7 +6,7 @@ using UnityEngine;
 public abstract class ScriptableDictionary<TKey, TValue> : ScriptableObject where TKey : Enum
 {
     [SerializeField] private GenericEntry<TKey, TValue>[] _entries;
-
+    
     private Dictionary<TKey, TValue> _dictionary;
 
     protected virtual void OnEnable()

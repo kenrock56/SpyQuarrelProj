@@ -142,8 +142,19 @@ namespace SpyQuarrelRuntime
 
                 if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
                 {
-                    if (hit.point != Vector3.zero)
-                        _character.Teleport(hit.point);
+                    if (hit.point == Vector3.zero)return;
+                    
+                    
+                    _character.Teleport(hit.point);
+                    
+                    var chara = NpcDictionary.Entries[NpcType.AlmostBaldDude];
+                    if (chara != null)
+                    {
+                        var playerPos = this.transform.position;
+                        playerPos.y = 0;
+                        
+                        Instantiate(chara, hit.point, Quaternion.LookRotation(playerPos));
+                    }
                 }
             }
         }
@@ -167,7 +178,8 @@ namespace SpyQuarrelRuntime
         private void HandleServerTick()
         {
             if (!IsServer) return;
-
+            
+            
             PlayerStatePayload lastState = default;
             bool hadInput = false;
 

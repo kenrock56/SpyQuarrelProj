@@ -21,4 +21,6 @@ MonoBehaviour:
     value: {fileID: 1708909533529912464, guid: b0b6649345a4003448c75a320d1f0a44, type: 3}
   scriptableObjects:
   - enabled: 1
+    value: {fileID: 11400000, guid: 1191593d22049a747beb5920964f47d2, type: 2}
+  - enabled: 1
     value: {fileID: 11400000, guid: 52066465b907017458495119d9de526a, type: 2}
