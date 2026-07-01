@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using KinematicCharacterController;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -26,23 +27,10 @@ namespace SpyQuarrelRuntime
         [SerializeField] private CircularBuffer<PlayerStatePayload> _serverStateBuffer;
         private Queue<PlayerInputPayload> _serverInputQueue;
 
-#if UNITY_EDITOR
-        //[SerializeField] private GameObject _clientCapsule;
-        //[SerializeField] private GameObject _serverCapsule;
-#endif
+        private bool _offlineMotorRegistered;
 
         private void Awake()
         {
-#if UNITY_EDITOR
-            // _serverCapsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            // if (_serverCapsule.TryGetComponent(out CapsuleCollider col))
-            //     col.enabled = false;
-            //
-            // _clientCapsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            // if (_clientCapsule.TryGetComponent(out CapsuleCollider col2))
-            //     col2.enabled = false;
-#endif
-
             if (_inputController == null)
                 TryGetComponent(out _inputController);
 
@@ -51,16 +39,17 @@ namespace SpyQuarrelRuntime
             if (_character != null)
                 _character.Initialize();
 
-            _networkTimer = new NetworkTimer(NetworkManager.Singleton);
-
             _clientStateBuffer = new(_bufferSize);
             _clientInputBuffer = new(_bufferSize);
-
             _serverStateBuffer = new(_bufferSize);
             _serverInputQueue = new();
 
-            _networkTimer.OnTick += HandleServerTick;
-            _networkTimer.OnTick += HandleClientTick;
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+            {
+                _networkTimer = new NetworkTimer(NetworkManager.Singleton);
+                _networkTimer.OnTick += HandleServerTick;
+                _networkTimer.OnTick += HandleClientTick;
+            }
         }
 
         public override void OnNetworkSpawn()
@@ -68,6 +57,13 @@ namespace SpyQuarrelRuntime
             base.OnNetworkSpawn();
 
             _networkSuccess = true;
+
+            if (_networkTimer == null)
+            {
+                _networkTimer = new NetworkTimer(NetworkManager.Singleton);
+                _networkTimer.OnTick += HandleServerTick;
+                _networkTimer.OnTick += HandleClientTick;
+            }
 
             if (_character != null && (IsServer || IsOwner))
                 _simulationBridge.RegisterMotor(_character.Motor);
@@ -84,10 +80,36 @@ namespace SpyQuarrelRuntime
 
             if (_character != null && (IsServer || IsOwner))
                 _simulationBridge.UnregisterMotor(_character.Motor);
+
+            UnregisterTimer();
+        }
+
+        private void OnDestroy()
+        {
+            if (!_networkSuccess && _offlineMotorRegistered && _character != null)
+            {
+                _simulationBridge.UnregisterMotor(_character.Motor);
+                _offlineMotorRegistered = false;
+            }
+
+            UnregisterTimer();
         }
 
         private void Start()
         {
+            if (!_networkSuccess)
+            {
+                if (_character != null && !_offlineMotorRegistered)
+                {
+                    _simulationBridge.RegisterMotor(_character.Motor);
+                    _offlineMotorRegistered = true;
+                }
+
+                CursorManager.SetCursor(false);
+                EnableLocalItems();
+                return;
+            }
+
             if (_networkSuccess && !IsOwner)
             {
                 DisableLocalItems();
@@ -98,47 +120,17 @@ namespace SpyQuarrelRuntime
             EnableLocalItems();
         }
 
-        private void EnableLocalItems()
-        {
-            if (_inputController != null)
-                _inputController.enabled = true;
-
-            if (_camera != null)
-            {
-                _camera.enabled = true;
-                _camera.Initialize(_character.GetCameraTarget());
-            }
-
-            SetLayerInChildren("Self");
-        }
-
-        private void DisableLocalItems()
-        {
-            if (_inputController != null)
-                _inputController.enabled = false;
-
-            if (_camera != null)
-                _camera.enabled = false;
-
-            SetLayerInChildren("Default");
-        }
-
-        private void SetLayerInChildren(string layerName)
-        {
-            int layer = LayerMask.NameToLayer(layerName);
-            if (layer == -1) return;
-
-            foreach (Transform child in _playerRoot.GetComponentsInChildren<Transform>(true))
-                child.gameObject.layer = layer;
-        }
-
         private void Update()
         {
             float deltaTime = Time.deltaTime;
 
-            _character.UpdateBody(deltaTime);
+            if (_character != null)
+                _character.UpdateBody(deltaTime);
 
             if (_networkSuccess && !IsOwner)
+                return;
+
+            if (_inputController == null || _camera == null)
                 return;
 
             CameraInput cameraInput = new CameraInput(_inputController.LookInput);
@@ -146,8 +138,7 @@ namespace SpyQuarrelRuntime
 
             if (_inputController.FirePressed)
             {
-                var forward = _camera.transform.forward;
-                var ray = new Ray(_camera.transform.position, forward);
+                Ray ray = new Ray(_camera.transform.position, _camera.transform.forward);
 
                 if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
                 {
@@ -155,6 +146,22 @@ namespace SpyQuarrelRuntime
                         _character.Teleport(hit.point);
                 }
             }
+        }
+
+        private void FixedUpdate()
+        {
+            if (_networkSuccess)
+                return;
+
+            if (_character == null || _inputController == null || _camera == null)
+                return;
+
+            PlayerInputCommand command = GetRequestedMovement();
+
+            _character.UpdateInput(command);
+
+            if (!_networkSuccess)
+                KinematicCharacterSystem.Settings.AutoSimulation = true;
         }
 
         private void HandleServerTick()
@@ -183,10 +190,6 @@ namespace SpyQuarrelRuntime
                         _character.SetPredictedState(statePayload);
                 }
 
-#if UNITY_EDITOR
-                //_serverCapsule.transform.position = statePayload.Position;
-#endif
-
                 _serverStateBuffer[bufferIndex] = statePayload;
 
                 if (!hadInput || input.Tick > lastState.Tick)
@@ -208,8 +211,8 @@ namespace SpyQuarrelRuntime
         {
             if (!IsClient || !IsOwner) return;
 
-            var currentTick = _networkTimer.CurrentTick;
-            var bufferIndex = currentTick % _bufferSize;
+            int currentTick = _networkTimer.CurrentTick;
+            int bufferIndex = currentTick % _bufferSize;
 
             PlayerInputPayload input = new PlayerInputPayload()
             {
@@ -225,10 +228,6 @@ namespace SpyQuarrelRuntime
 
                 PlayerStatePayload statePayload = ProcessMovement(input);
 
-#if UNITY_EDITOR
-                //_clientCapsule.transform.position = statePayload.Position;
-#endif
-
                 _clientStateBuffer[bufferIndex] = statePayload;
                 _serverStateBuffer[bufferIndex] = statePayload;
 
@@ -240,10 +239,6 @@ namespace SpyQuarrelRuntime
                 SendToServerRpc(input);
 
                 PlayerStatePayload statePayload = ProcessMovement(input);
-
-#if UNITY_EDITOR
-                //_clientCapsule.transform.position = statePayload.Position;
-#endif
 
                 _clientStateBuffer[bufferIndex] = statePayload;
 
@@ -324,10 +319,10 @@ namespace SpyQuarrelRuntime
 
         private PlayerStatePayload ProcessMovement(PlayerInputPayload input)
         {
-            var fixeddt = _networkTimer.FixedTickInterval;
+            float fixedDt = _networkTimer.FixedTickInterval;
 
             _character.UpdateInput(input.Command);
-            _simulationBridge.SimulateMotor(_character.Motor, fixeddt);
+            _simulationBridge.SimulateMotor(_character.Motor, fixedDt);
 
             return _character.GetPredictedState(input.Tick);
         }
@@ -341,7 +336,6 @@ namespace SpyQuarrelRuntime
         {
             return PlayerImpliedStatePayload.FullToImplied(state);
         }
-
 
         public Transform GetCameraTransform()
         {
@@ -357,6 +351,52 @@ namespace SpyQuarrelRuntime
                 Jump = _inputController.TryToJump,
                 Crouch = _inputController.ConsumeCrouchInput(),
             };
+        }
+
+        private void EnableLocalItems()
+        {
+            if (_inputController != null)
+                _inputController.enabled = true;
+
+            if (_camera != null)
+            {
+                _camera.enabled = true;
+                _camera.Initialize(_character.GetCameraTarget());
+            }
+
+            SetLayerInChildren("Self");
+        }
+
+        private void DisableLocalItems()
+        {
+            if (_inputController != null)
+                _inputController.enabled = false;
+
+            if (_camera != null)
+                _camera.enabled = false;
+
+            SetLayerInChildren("Default");
+        }
+
+        private void SetLayerInChildren(string layerName)
+        {
+            if (_playerRoot == null)
+                return;
+
+            int layer = LayerMask.NameToLayer(layerName);
+            if (layer == -1) return;
+
+            foreach (Transform child in _playerRoot.GetComponentsInChildren<Transform>(true))
+                child.gameObject.layer = layer;
+        }
+
+        private void UnregisterTimer()
+        {
+            if (_networkTimer == null)
+                return;
+
+            _networkTimer.OnTick -= HandleServerTick;
+            _networkTimer.OnTick -= HandleClientTick;
         }
     }
 }
