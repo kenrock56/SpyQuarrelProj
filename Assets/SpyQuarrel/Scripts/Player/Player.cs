@@ -359,7 +359,7 @@ namespace SpyQuarrelRuntime
             return new PlayerInputCommand()
             {
                 Movement = _inputController.MoveInput,
-                Rotation = _camera.transform.rotation,
+                Rotation = _camera.BodyRotation,
                 Jump = _inputController.TryToJump,
                 Crouch = _inputController.ConsumeCrouchInput(),
             };

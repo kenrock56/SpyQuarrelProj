@@ -15,6 +15,9 @@
 /[Uu]ser[Ss]ettings/
 *.log
 
+# Ignore nested folder
+Assets/npc_casual_set_00/
+
 # By default unity supports Blender asset imports, *.blend1 blender files do not need to be commited to version control.
 *.blend1
 *.blend1.meta

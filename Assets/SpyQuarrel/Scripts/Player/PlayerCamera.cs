@@ -5,38 +5,52 @@ namespace SpyQuarrelRuntime
 {
     public class PlayerCamera : MonoBehaviour
     {
-        [SerializeField]private Vector2 _mouseSensitivity = new Vector2(0.2f, 0.2f);
+        [SerializeField] private Vector2 _mouseSensitivity = new Vector2(0.2f, 0.2f);
+        [SerializeField] private float _minPitch = -85f;
+        [SerializeField] private float _maxPitch = 85f;
 
-        
-        
         private Transform _cameraTarget;
 
-        private Vector3 _eulerAngles;
-        
+        private float _yaw;
+        private float _pitch;
+
+        public Quaternion BodyRotation => Quaternion.Euler(0f, _yaw, 0f);
+        public Quaternion CameraRotation => Quaternion.Euler(_pitch, _yaw, 0f);
+
         public void Initialize(Transform cameraTarget)
         {
             _cameraTarget = cameraTarget;
+
+            Vector3 startAngles = cameraTarget.eulerAngles;
+
+            _yaw = startAngles.y;
+            _pitch = NormalizePitch(startAngles.x);
+
             transform.position = cameraTarget.position;
-            transform.rotation = cameraTarget.rotation;
-            
-            transform.eulerAngles = _eulerAngles = cameraTarget.eulerAngles;
+            transform.rotation = CameraRotation;
 
             var cinemachineCam = FindFirstObjectByType<CinemachineCamera>();
-            if (cinemachineCam == null)return;
-            
-            cinemachineCam.Target.TrackingTarget = _cameraTarget;
+
+            if (cinemachineCam != null)
+                cinemachineCam.Target.TrackingTarget = _cameraTarget;
         }
-        
+
         public void UpdateRotation(CameraInput input)
         {
-            _eulerAngles += new Vector3(-input.Look.y * _mouseSensitivity.y, input.Look.x * _mouseSensitivity.x);
-            transform.eulerAngles = _eulerAngles;
+            _yaw += input.Look.x * _mouseSensitivity.x;
+            _pitch -= input.Look.y * _mouseSensitivity.y;
+
+            _pitch = Mathf.Clamp(_pitch, _minPitch, _maxPitch);
+
+            transform.rotation = CameraRotation;
         }
-        
-        
-        public void UpdatePosition(Transform target)
+
+        private float NormalizePitch(float pitch)
         {
-            //transform.position = target.position;
+            if (pitch > 180f)
+                pitch -= 360f;
+
+            return Mathf.Clamp(pitch, _minPitch, _maxPitch);
         }
     }
 }
