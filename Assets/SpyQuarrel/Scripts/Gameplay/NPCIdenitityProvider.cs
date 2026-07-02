@@ -1,92 +1,108 @@
-    using System;
-    using UnityEngine;
+using System;
+using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace SpyQuarrelRuntime
 {
     public class NPCIdenitityProvider : MonoBehaviour
     {
-       [field:SerializeField]public NpcType NpcIdentityType { get;private set; }
-       
-       private GameObject _root;
-       private GameObject _currentIdentity;
-       
-       [SerializeField]private Transform _followTransform;
-       
-       [SerializeField]private Animator _animator;
+        [field: SerializeField] public NpcType NpcIdentityType { get; private set; }
 
-       void Awake()
-       {
-           InitialiseIdentity();
-       }
+        private GameObject _root;
+        private GameObject _currentIdentity;
 
-       void Start()
-       {
-           BuildNpc();
-       }
+        
+        [SerializeField] private Transform _followPositionTransform;
 
-       void InitialiseIdentity()
-       {
-           if(_root != null)return;
-           
-           _root = new GameObject("root");
-           _root.transform.parent = transform;
-           _root.transform.localPosition = Vector3.zero;
-       }
+        [SerializeField] private Transform _followRotationTransform;
 
-       private void FixedUpdate()
-       {
-           UpdatePosition();
-       }
+        [SerializeField] private Animator _animator;
 
-       private void Update()
-       {
-          UpdatePosition();
-       }
+        [Header("Rotation Smoothing")]
+        [SerializeField] private float _rotationLerpSpeed = 15f;
 
-       private void LateUpdate()
-       {
-           UpdatePosition();
-       }
+        private void Awake()
+        {
+            InitialiseIdentity();
+        }
 
+        private void Start()
+        {
+            BuildNpc();
+        }
 
-       private void UpdatePosition()
-       {
-           if(_followTransform == null)return;
-           if(_currentIdentity == null)return;
-           
-           this.transform.position = _followTransform.position;
-       }
+        private void InitialiseIdentity()
+        {
+            if (_root != null) return;
 
-       void BuildNpc()
-       {
-           
-           if (NpcDictionary.Entries[NpcIdentityType] is { } identity)
-           {
-               if (_currentIdentity != null)
-               {
-                   Destroy(_currentIdentity);
-               }
-               
-               var disguise = Instantiate(identity, identity.transform.position, _root.transform.rotation);
-               
-               disguise.transform.parent = _root.transform;
-               disguise.transform.localPosition = Vector3.zero;
-               
-               _currentIdentity = disguise;
-               
-               _animator = _currentIdentity.GetComponent<Animator>();
-           }
-       }
+            _root = transform.gameObject;
+        }
 
-       public void SetAppearance(NpcType npcIdentityType)
-       {
-           NpcIdentityType = npcIdentityType;
-           BuildNpc();
-       }
+        private void LateUpdate()
+        {
+            UpdatePosition();
+            UpdateRotation();
+        }
 
-       private void OnValidate()
-       {
-           BuildNpc();
-       }
+        private void UpdatePosition()
+        {
+            if (_followPositionTransform == null) return;
+            if (_currentIdentity == null) return;
+
+            transform.position = _followPositionTransform.position;
+        }
+
+        private void UpdateRotation()
+        {
+            if (_followRotationTransform == null) return;
+            if (_currentIdentity == null) return;
+            
+            Quaternion targetRotation = _followRotationTransform.rotation;
+
+            if (_rotationLerpSpeed <= 0f)
+            {
+                transform.rotation = targetRotation;
+                return;
+            }
+            
+            float deltaTime = Time.deltaTime;
+
+            float lerpAmount = 1f - Mathf.Exp(-_rotationLerpSpeed * deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, lerpAmount);
+        }
+
+        private void BuildNpc()
+        {
+            if (!NpcDictionary.HasInstance) return;
+
+            if (NpcDictionary.Entries[NpcIdentityType] is { } identity)
+            {
+                if (_currentIdentity != null)
+                {
+                    Destroy(_currentIdentity);
+                }
+
+                GameObject disguise = Instantiate(identity, _root.transform);
+                disguise.transform.localPosition = Vector3.zero;
+                disguise.transform.localRotation = Quaternion.identity;
+
+                _currentIdentity = disguise;
+                _animator = _currentIdentity.GetComponent<Animator>();
+            }
+        }
+
+        public void SetAppearance(NpcType npcIdentityType)
+        {
+            NpcIdentityType = npcIdentityType;
+            BuildNpc();
+        }
+
+        private void OnValidate()
+        {
+            if (Application.isPlaying)
+            {
+                // BuildNpc();
+            }
+        }
     }
 }
