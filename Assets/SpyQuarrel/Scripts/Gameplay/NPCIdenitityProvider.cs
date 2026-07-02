@@ -10,6 +10,8 @@ namespace SpyQuarrelRuntime
        private GameObject _root;
        private GameObject _currentIdentity;
        
+       [SerializeField]private Transform _followTransform;
+       
        [SerializeField]private Animator _animator;
 
        void Awake()
@@ -30,7 +32,31 @@ namespace SpyQuarrelRuntime
            _root.transform.parent = transform;
            _root.transform.localPosition = Vector3.zero;
        }
-       
+
+       private void FixedUpdate()
+       {
+           UpdatePosition();
+       }
+
+       private void Update()
+       {
+          UpdatePosition();
+       }
+
+       private void LateUpdate()
+       {
+           UpdatePosition();
+       }
+
+
+       private void UpdatePosition()
+       {
+           if(_followTransform == null)return;
+           if(_currentIdentity == null)return;
+           
+           this.transform.position = _followTransform.position;
+       }
+
        void BuildNpc()
        {
            
@@ -50,6 +76,12 @@ namespace SpyQuarrelRuntime
                
                _animator = _currentIdentity.GetComponent<Animator>();
            }
+       }
+
+       public void SetAppearance(NpcType npcIdentityType)
+       {
+           NpcIdentityType = npcIdentityType;
+           BuildNpc();
        }
 
        private void OnValidate()

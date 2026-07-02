@@ -41,7 +41,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4849734157789539932}
-  - component: {fileID: 8475764571309887402}
   m_Layer: 3
   m_Name: Root (Char body)
   m_TagString: Untagged
@@ -64,20 +63,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8512189753772775889}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8475764571309887402
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1292556832802930648}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 503f8909b0233d84d9869c629b9282a2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  <NpcIdentityType>k__BackingField: 6
-  _animator: {fileID: 0}
 --- !u!1 &4084044024430472769
 GameObject:
   m_ObjectHideFlags: 0
@@ -191,7 +176,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3599712764
+  GlobalObjectIdHash: 3938274260
   InScenePlacedSourceGlobalObjectIdHash: 2978554912
   DeferredDespawnTick: 0
   Ownership: 1
