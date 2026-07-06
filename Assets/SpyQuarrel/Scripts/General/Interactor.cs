@@ -4,7 +4,9 @@ namespace SpyQuarrelRuntime
 {
     public class Interactor : MonoBehaviour
     {
-        public IInteractable CuurentInteractable => _currentInteractable;
+        [field:SerializeField]public PlayerRole PlayerRole { get; private set; }
+        
+        public IInteractable CurrentInteractable => _currentInteractable;
         private IInteractable _currentInteractable;
         
         [SerializeField]private bool _canInteract;
@@ -18,6 +20,22 @@ namespace SpyQuarrelRuntime
         
         void Awake()
         {
+            if (transform.root.TryGetComponent(out Player player))
+            {
+                switch (player)
+                {
+                    case SpyCharacter:
+                        PlayerRole = PlayerRole.Spy;
+                        break;
+                    case SniperCharacter:
+                        PlayerRole = PlayerRole.Sniper;
+                        break;
+                    default:
+                        PlayerRole = PlayerRole.None;
+                        break;
+                }
+            }
+            
             if (!_inputController)
             {
                 _inputController = GetComponent<PlayerInputController>();

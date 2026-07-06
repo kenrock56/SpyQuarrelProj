@@ -1,4 +1,5 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -20,7 +21,8 @@ namespace SpyQuarrelRuntime
 
         [Header("Rotation Smoothing")]
         [SerializeField] private float _rotationLerpSpeed = 15f;
-
+        
+        
         private void Awake()
         {
             InitialiseIdentity();
@@ -29,6 +31,11 @@ namespace SpyQuarrelRuntime
         private void Start()
         {
             BuildNpc();
+            if (NetworkManager.Singleton.IsListening)
+            {
+                NetworkManager.Singleton.NetworkTickSystem.Tick += UpdatePosition;
+                NetworkManager.Singleton.NetworkTickSystem.Tick += UpdateRotation;
+            }
         }
 
         private void InitialiseIdentity()
@@ -95,6 +102,12 @@ namespace SpyQuarrelRuntime
         {
             NpcIdentityType = npcIdentityType;
             BuildNpc();
+        }
+
+        private void OnDestroy()
+        {
+            NetworkManager.Singleton.NetworkTickSystem.Tick -= UpdatePosition;
+            NetworkManager.Singleton.NetworkTickSystem.Tick -= UpdateRotation;
         }
 
         private void OnValidate()

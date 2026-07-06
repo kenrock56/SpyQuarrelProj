@@ -1,8 +1,10 @@
 using System;
+using System.Linq;
 using AutoSingleton;
 using SpyQuarrelProject;
 using Unity.Netcode;
 using UnityEngine;
+using Random = System.Random;
 
 namespace SpyQuarrelRuntime
 {
@@ -19,6 +21,8 @@ namespace SpyQuarrelRuntime
         }
 
         private Action _onSuccessfulSpawn;
+        
+        public Player LocalPlayer { get;private set; }
 
         public void SpawnAsRole(PlayerRole role)
         {
@@ -49,13 +53,15 @@ namespace SpyQuarrelRuntime
             RequestSpawnAsRoleRpc(role);
         }
 
-        [Rpc(SendTo.Server, RequireOwnership = false)]
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         private void RequestSpawnAsRoleRpc(PlayerRole role, RpcParams rpcParams = default)
         {
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             SpawnPlayer(senderClientId, role);
         }
 
+        
+        
         private void SpawnPlayer(ulong clientId, PlayerRole role)
         {
             if (!IsServer)
@@ -91,7 +97,9 @@ namespace SpyQuarrelRuntime
                 client.PlayerObject.Despawn(true);
             }
 
-            Player playerInstance = Instantiate(prefab, new Vector3(0, 50, 0), Quaternion.identity);
+            var pos = GetRoleSpawn(role);
+            
+            Player playerInstance = Instantiate(prefab, pos, Quaternion.identity);
             NetworkObject spawnedNetworkObject = playerInstance.GetComponent<NetworkObject>();
 
             if (spawnedNetworkObject == null)
@@ -103,9 +111,27 @@ namespace SpyQuarrelRuntime
 
             spawnedNetworkObject.SpawnAsPlayerObject(clientId, true);
 
+            if (IsOwner)
+            {
+                LocalPlayer = playerInstance;
+            }
+
             var playerTarget = RpcTarget.Single(clientId, RpcTargetUse.Temp);
             
             InvokeSuccessfulSpawnRpc(playerTarget);
+        }
+
+        private Vector3 GetRoleSpawn(PlayerRole role)
+        {
+            var spawnPoints = FindObjectsByType<PlayerSpawnPoint>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+                .Where(spawn => spawn.SpawnRole == role).Select(point => point.SpawnPosition) .ToList();
+            
+            var finalPoint = UnityEngine.Random.Range(0, 50);
+            
+            var point = finalPoint % spawnPoints.Count;
+            
+            
+            return spawnPoints[point];
         }
 
         [Rpc(SendTo.SpecifiedInParams)]

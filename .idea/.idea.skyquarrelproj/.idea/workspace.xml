@@ -6,6 +6,19 @@
   <component name="ChangeListManager">
     <list default="true" id="cc6078b2-80d0-4870-b36d-46201c1529a1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.skyquarrelproj/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.skyquarrelproj/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/DefaultNetworkPrefabs.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/DefaultNetworkPrefabs.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Singleton/Scriptable Object/PlayerPrefabDictionary.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Singleton/Scriptable Object/PlayerPrefabDictionary.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Prefabs/Roles/SniperCharacter.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Prefabs/Roles/SniperCharacter.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Scenes/SampleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Scenes/SampleScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Gameplay/NPCIdenitityProvider.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Gameplay/NPCIdenitityProvider.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/General/Interactor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/General/Interactor.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Network/NetworkMan.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Network/NetworkMan.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Player/Player.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Player/Player.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/npc_casual_set_00.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/npc_casual_set_00.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/MultiplayerManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/MultiplayerManager.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/Packages/com.unity.probuilder/Settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/Packages/com.unity.probuilder/Settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/QualitySettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/QualitySettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/URPProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/URPProjectSettings.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,6 +29,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Gameplay/Sniper Specifics/TeleportPoint.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/General/InteractableObject.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/General/Interactor.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/SpyQuarrel/Scripts/Interfaces/IInteractable.cs" root0="FORCE_HIGHLIGHTING" />
@@ -128,6 +142,8 @@
       <workItem from="1781835827853" duration="668000" />
       <workItem from="1781913624875" duration="2361000" />
       <workItem from="1782713578473" duration="3127000" />
+      <workItem from="1783251615491" duration="5276000" />
+      <workItem from="1783288578368" duration="4894000" />
     </task>
     <servers />
   </component>

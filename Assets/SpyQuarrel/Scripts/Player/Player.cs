@@ -142,17 +142,18 @@ namespace SpyQuarrelRuntime
 
                 if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
                 {
-                    if (hit.point == Vector3.zero)return;
-                    
-                    
-                    _character.Teleport(hit.point);
-                    
+                    if (hit.point == Vector3.zero)
+                        return;
+
+                    Teleport(hit.point);
+
                     var chara = NpcDictionary.Entries[NpcType.AlmostBaldDude];
+
                     if (chara != null)
                     {
-                        var playerPos = this.transform.position;
-                        playerPos.y = 0;
-                        
+                        Vector3 playerPos = transform.position;
+                        playerPos.y = 0f;
+
                         Instantiate(chara, hit.point, Quaternion.LookRotation(playerPos));
                     }
                 }
@@ -178,8 +179,7 @@ namespace SpyQuarrelRuntime
         private void HandleServerTick()
         {
             if (!IsServer) return;
-            
-            
+
             PlayerStatePayload lastState = default;
             bool hadInput = false;
 
@@ -296,6 +296,79 @@ namespace SpyQuarrelRuntime
             }
         }
 
+        public void Teleport(Vector3 position)
+        {
+            if (_character == null)
+                return;
+
+            if (!_networkSuccess)
+            {
+                ApplyTeleportState(position, 0, true, true);
+                return;
+            }
+
+            if (!IsOwner)
+                return;
+
+            int tick = _networkTimer.CurrentTick;
+
+            ApplyTeleportState(position, tick, true, IsServer);
+
+            if (IsServer)
+            {
+                BroadcastTeleportState(tick);
+            }
+            else
+            {
+                RequestTeleportRpc(position, tick);
+            }
+        }
+
+        public void TeleportPlayer(Vector3 position)
+        {
+            var tick = _networkTimer.CurrentTick;
+            RequestTeleportRpc(position, tick);
+        }
+        
+        [Rpc(SendTo.Server)]
+        public void RequestTeleportRpc(Vector3 position, int clientTick)
+        {
+            if (!IsServer)
+                return;
+
+            ApplyTeleportState(position, clientTick, false, true);
+
+            BroadcastTeleportState(clientTick);
+        }
+
+        private void BroadcastTeleportState(int tick)
+        {
+            int bufferIndex = tick % _bufferSize;
+
+            PlayerStatePayload state = _serverStateBuffer[bufferIndex];
+
+            SendToClientRpc(CreateReconciliationStatePayload(state));
+            SendStateToObserversRpc(CreateImpliedStatePayload(state));
+        }
+
+        private void ApplyTeleportState(Vector3 position, int tick, bool writeClientBuffer, bool writeServerBuffer)
+        {
+            _character.Teleport(position);
+
+            PlayerStatePayload state = _character.GetPredictedState(tick);
+
+            int bufferIndex = tick % _bufferSize;
+
+            if (writeClientBuffer)
+                _clientStateBuffer[bufferIndex] = state;
+
+            if (writeServerBuffer)
+                _serverStateBuffer[bufferIndex] = state;
+
+            _lastServerState = state;
+            _lastProcessedState = state;
+        }
+
         private bool ShouldReconcile()
         {
             bool isNewServerState = !_lastServerState.Equals(default);
@@ -318,7 +391,12 @@ namespace SpyQuarrelRuntime
         {
             if (!IsOwner) return;
 
-            _lastServerState = state.ReconcileToFull();
+            PlayerStatePayload fullState = state.ReconcileToFull();
+
+            _lastServerState = fullState;
+
+            int bufferIndex = fullState.Tick % _bufferSize;
+            _clientStateBuffer[bufferIndex] = fullState;
         }
 
         [Rpc(SendTo.NotOwner)]
