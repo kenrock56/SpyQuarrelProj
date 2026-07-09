@@ -552,8 +552,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 398681080
-  InScenePlacedSourceGlobalObjectIdHash: 2978554912
+  GlobalObjectIdHash: 763565590
+  InScenePlacedSourceGlobalObjectIdHash: 763565590
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
@@ -602,13 +602,13 @@ MonoBehaviour:
   _bufferSize: 1024
   _clientStateBuffer:
     _buffer: []
-    _bufferSize: 0
+    _bufferSize: 1024
   _clientInputBuffer:
     _buffer: []
-    _bufferSize: 0
+    _bufferSize: 1024
   _serverStateBuffer:
     _buffer: []
-    _bufferSize: 0
+    _bufferSize: 1024
 --- !u!114 &3489075128166846139
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -621,9 +621,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae9c7adc1749df447ac6b9775cd6a59c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <PlayerRole>k__BackingField: 1
   _canInteract: 0
   _interactRange: 1000
-  _inputController: {fileID: 0}
+  _inputController: {fileID: 1017511270945477725}
 --- !u!1 &5963620184998747989
 GameObject:
   m_ObjectHideFlags: 0

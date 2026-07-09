@@ -16,6 +16,9 @@ namespace SpyQuarrelRuntime
 
         public CircularBuffer(int bufferSize)
         {
+            if(bufferSize <= 0)
+                bufferSize = 1024;
+            
             _bufferSize = bufferSize;
             _buffer = new T[_bufferSize];
         }
