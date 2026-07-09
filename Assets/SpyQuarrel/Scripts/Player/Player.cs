@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using KinematicCharacterController;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace SpyQuarrelRuntime
 {
@@ -40,21 +39,14 @@ namespace SpyQuarrelRuntime
             if (_character != null)
                 _character.Initialize();
 
-            _clientStateBuffer = new(_bufferSize);
-            _clientInputBuffer = new(_bufferSize);
-            _serverStateBuffer = new(_bufferSize);
-            _serverInputQueue = new();
+            _clientStateBuffer = new CircularBuffer<PlayerStatePayload>(_bufferSize);
+            _clientInputBuffer = new CircularBuffer<PlayerInputPayload>(_bufferSize);
+            _serverStateBuffer = new CircularBuffer<PlayerStatePayload>(_bufferSize);
+            _serverInputQueue = new Queue<PlayerInputPayload>();
 
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
-            {
-                _networkTimer = new NetworkTimer(NetworkManager.Singleton);
-                _networkTimer.OnTick += HandleServerTick;
-                _networkTimer.OnTick += HandleClientTick;
-            }
-            
+                CreateNetworkTimerIfNeeded();
         }
-
-        
 
         public void InitializeSpawnPosition(Vector3 position)
         {
@@ -70,12 +62,7 @@ namespace SpyQuarrelRuntime
 
             _networkSuccess = true;
 
-            if (_networkTimer == null)
-            {
-                _networkTimer = new NetworkTimer(NetworkManager.Singleton);
-                _networkTimer.OnTick += HandleServerTick;
-                _networkTimer.OnTick += HandleClientTick;
-            }
+            CreateNetworkTimerIfNeeded();
 
             if (_character != null && (IsServer || IsOwner))
                 _simulationBridge.RegisterMotor(_character.Motor);
@@ -84,6 +71,8 @@ namespace SpyQuarrelRuntime
                 EnableLocalItems();
             else
                 DisableLocalItems();
+
+            InitializeNetworkSpawnState();
         }
 
         public override void OnNetworkDespawn()
@@ -155,7 +144,15 @@ namespace SpyQuarrelRuntime
                     if (hit.point == Vector3.zero)
                         return;
 
-                    CheatTeleport(hit.point);
+                    if (IsServer)
+                    {
+                        Teleport(hit.point);
+                    }
+                    else
+                    {
+                        CheatTeleport(hit.point);
+                    }
+                    
                 }
             }
         }
@@ -301,11 +298,11 @@ namespace SpyQuarrelRuntime
             }
         }
 
+
         private void CheatTeleport(Vector3 position)
         {
             _character.Teleport(position);
         }
-        
         public void Teleport(Vector3 position)
         {
             if (_character == null)
@@ -330,6 +327,27 @@ namespace SpyQuarrelRuntime
                 RequestTeleportRpc(position, tick);
         }
 
+        public void TeleportPlayer(Vector3 position)
+        {
+            if (_character == null)
+                return;
+
+            if (!_networkSuccess || _networkTimer == null)
+            {
+                InitializeSpawnPosition(position);
+                return;
+            }
+
+            int tick = _networkTimer.CurrentTick;
+
+            ApplyTeleportState(position, tick, true, IsServer);
+
+            if (IsServer)
+                BroadcastTeleportState(tick);
+            else
+                RequestTeleportRpc(position, tick);
+        }
+
         [Rpc(SendTo.Server)]
         public void RequestTeleportRpc(Vector3 position, int clientTick)
         {
@@ -337,12 +355,14 @@ namespace SpyQuarrelRuntime
                 return;
 
             ApplyTeleportState(position, clientTick, false, true);
+
             BroadcastTeleportState(clientTick);
         }
 
         private void BroadcastTeleportState(int tick)
         {
             int bufferIndex = tick % _bufferSize;
+
             PlayerStatePayload state = _serverStateBuffer[bufferIndex];
 
             SendToClientRpc(CreateReconciliationStatePayload(state));
@@ -354,6 +374,7 @@ namespace SpyQuarrelRuntime
             _character.Teleport(position);
 
             PlayerStatePayload state = _character.GetPredictedState(tick);
+
             int bufferIndex = tick % _bufferSize;
 
             if (writeClientBuffer)
@@ -414,6 +435,26 @@ namespace SpyQuarrelRuntime
             _simulationBridge.SimulateMotor(_character.Motor, fixedDt);
 
             return _character.GetPredictedState(input.Tick);
+        }
+
+        private void InitializeNetworkSpawnState()
+        {
+            if (_character == null || _networkTimer == null)
+                return;
+
+            int tick = _networkTimer.CurrentTick;
+            int bufferIndex = tick % _bufferSize;
+
+            PlayerStatePayload state = _character.GetPredictedState(tick);
+
+            if (IsOwner)
+                _clientStateBuffer[bufferIndex] = state;
+
+            if (IsServer)
+                _serverStateBuffer[bufferIndex] = state;
+
+            _lastServerState = state;
+            _lastProcessedState = state;
         }
 
         private PlayerReconciliationStatePayload CreateReconciliationStatePayload(PlayerStatePayload state)
@@ -481,6 +522,19 @@ namespace SpyQuarrelRuntime
                 child.gameObject.layer = layer;
         }
 
+        private void CreateNetworkTimerIfNeeded()
+        {
+            if (_networkTimer != null)
+                return;
+
+            if (NetworkManager.Singleton == null)
+                return;
+
+            _networkTimer = new NetworkTimer(NetworkManager.Singleton);
+            _networkTimer.OnTick += HandleServerTick;
+            _networkTimer.OnTick += HandleClientTick;
+        }
+
         private void UnregisterTimer()
         {
             if (_networkTimer == null)
@@ -488,6 +542,7 @@ namespace SpyQuarrelRuntime
 
             _networkTimer.OnTick -= HandleServerTick;
             _networkTimer.OnTick -= HandleClientTick;
+            _networkTimer = null;
         }
     }
 }

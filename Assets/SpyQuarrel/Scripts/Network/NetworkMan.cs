@@ -118,7 +118,7 @@ namespace SpyQuarrelRuntime
         }
 
         [Rpc(SendTo.Everyone)]
-        private void BroadcastMessage(FixedString64Bytes message, RpcParams rpcParams = default
+        private void BroadcastMessageRpc(FixedString64Bytes message, RpcParams rpcParams = default
         )
         {
             Debug.Log(message);
