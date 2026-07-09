@@ -70,9 +70,9 @@ namespace SpyQuarrelRuntime
             }
         }
 
-        private void OnConnection(NetworkManager arg1, ConnectionEventData connectionEventData)
+        private void OnConnection(NetworkManager netman, ConnectionEventData connectionEventData)
         {
-            var success = connectionEventData.EventType == ConnectionEvent.ClientConnected;
+            var success = connectionEventData.EventType == ConnectionEvent.ClientConnected && connectionEventData.ClientId == NetworkManager.Singleton.LocalClientId; ;
 
             if (success)
             {

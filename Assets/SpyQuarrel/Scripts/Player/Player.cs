@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using KinematicCharacterController;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace SpyQuarrelRuntime
 {
@@ -50,6 +51,17 @@ namespace SpyQuarrelRuntime
                 _networkTimer.OnTick += HandleServerTick;
                 _networkTimer.OnTick += HandleClientTick;
             }
+            
+        }
+
+        
+
+        public void InitializeSpawnPosition(Vector3 position)
+        {
+            transform.position = position;
+
+            if (_character != null)
+                _character.Teleport(position);
         }
 
         public override void OnNetworkSpawn()
@@ -122,10 +134,8 @@ namespace SpyQuarrelRuntime
 
         private void Update()
         {
-            float deltaTime = Time.deltaTime;
-
             if (_character != null)
-                _character.UpdateBody(deltaTime);
+                _character.UpdateBody(Time.deltaTime);
 
             if (_networkSuccess && !IsOwner)
                 return;
@@ -145,17 +155,7 @@ namespace SpyQuarrelRuntime
                     if (hit.point == Vector3.zero)
                         return;
 
-                    Teleport(hit.point);
-
-                    var chara = NpcDictionary.Entries[NpcType.AlmostBaldDude];
-
-                    if (chara != null)
-                    {
-                        Vector3 playerPos = transform.position;
-                        playerPos.y = 0f;
-
-                        Instantiate(chara, hit.point, Quaternion.LookRotation(playerPos));
-                    }
+                    CheatTeleport(hit.point);
                 }
             }
         }
@@ -178,7 +178,8 @@ namespace SpyQuarrelRuntime
 
         private void HandleServerTick()
         {
-            if (!IsServer) return;
+            if (!IsServer)
+                return;
 
             PlayerStatePayload lastState = default;
             bool hadInput = false;
@@ -211,9 +212,11 @@ namespace SpyQuarrelRuntime
                 }
             }
 
-            if (!hadInput) return;
+            if (!hadInput)
+                return;
 
-            if (IsHost && IsOwner) return;
+            if (IsHost && IsOwner)
+                return;
 
             SendToClientRpc(CreateReconciliationStatePayload(lastState));
             SendStateToObserversRpc(CreateImpliedStatePayload(lastState));
@@ -221,7 +224,8 @@ namespace SpyQuarrelRuntime
 
         private void HandleClientTick()
         {
-            if (!IsClient || !IsOwner) return;
+            if (!IsClient || !IsOwner)
+                return;
 
             int currentTick = _networkTimer.CurrentTick;
             int bufferIndex = currentTick % _bufferSize;
@@ -260,7 +264,8 @@ namespace SpyQuarrelRuntime
 
         private void HandleServerReconciliation()
         {
-            if (!ShouldReconcile()) return;
+            if (!ShouldReconcile())
+                return;
 
             int bufferIndex = _lastServerState.Tick % _bufferSize;
 
@@ -296,6 +301,11 @@ namespace SpyQuarrelRuntime
             }
         }
 
+        private void CheatTeleport(Vector3 position)
+        {
+            _character.Teleport(position);
+        }
+        
         public void Teleport(Vector3 position)
         {
             if (_character == null)
@@ -315,21 +325,11 @@ namespace SpyQuarrelRuntime
             ApplyTeleportState(position, tick, true, IsServer);
 
             if (IsServer)
-            {
                 BroadcastTeleportState(tick);
-            }
             else
-            {
                 RequestTeleportRpc(position, tick);
-            }
         }
 
-        public void TeleportPlayer(Vector3 position)
-        {
-            var tick = _networkTimer.CurrentTick;
-            RequestTeleportRpc(position, tick);
-        }
-        
         [Rpc(SendTo.Server)]
         public void RequestTeleportRpc(Vector3 position, int clientTick)
         {
@@ -337,14 +337,12 @@ namespace SpyQuarrelRuntime
                 return;
 
             ApplyTeleportState(position, clientTick, false, true);
-
             BroadcastTeleportState(clientTick);
         }
 
         private void BroadcastTeleportState(int tick)
         {
             int bufferIndex = tick % _bufferSize;
-
             PlayerStatePayload state = _serverStateBuffer[bufferIndex];
 
             SendToClientRpc(CreateReconciliationStatePayload(state));
@@ -356,7 +354,6 @@ namespace SpyQuarrelRuntime
             _character.Teleport(position);
 
             PlayerStatePayload state = _character.GetPredictedState(tick);
-
             int bufferIndex = tick % _bufferSize;
 
             if (writeClientBuffer)
@@ -389,7 +386,8 @@ namespace SpyQuarrelRuntime
         [Rpc(SendTo.Owner)]
         private void SendToClientRpc(PlayerReconciliationStatePayload state)
         {
-            if (!IsOwner) return;
+            if (!IsOwner)
+                return;
 
             PlayerStatePayload fullState = state.ReconcileToFull();
 
@@ -402,7 +400,8 @@ namespace SpyQuarrelRuntime
         [Rpc(SendTo.NotOwner)]
         private void SendStateToObserversRpc(PlayerImpliedStatePayload state)
         {
-            if (IsServer) return;
+            if (IsServer)
+                return;
 
             _character.SetImpliedState(state);
         }
@@ -474,7 +473,9 @@ namespace SpyQuarrelRuntime
                 return;
 
             int layer = LayerMask.NameToLayer(layerName);
-            if (layer == -1) return;
+
+            if (layer == -1)
+                return;
 
             foreach (Transform child in _playerRoot.GetComponentsInChildren<Transform>(true))
                 child.gameObject.layer = layer;

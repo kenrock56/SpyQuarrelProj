@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using AutoSingleton;
 using SpyQuarrelProject;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
-using Random = System.Random;
 
 namespace SpyQuarrelRuntime
 {
@@ -21,8 +21,8 @@ namespace SpyQuarrelRuntime
         }
 
         private Action _onSuccessfulSpawn;
-        
-        public Player LocalPlayer { get;private set; }
+
+        public Player LocalPlayer { get; private set; }
 
         public void SpawnAsRole(PlayerRole role)
         {
@@ -60,8 +60,6 @@ namespace SpyQuarrelRuntime
             SpawnPlayer(senderClientId, role);
         }
 
-        
-        
         private void SpawnPlayer(ulong clientId, PlayerRole role)
         {
             if (!IsServer)
@@ -70,7 +68,7 @@ namespace SpyQuarrelRuntime
                 return;
             }
 
-            var prefab = PlayerPrefabDictionary.Instance.GetValue(role);
+            Player prefab = PlayerPrefabDictionary.Instance.GetValue(role);
 
             if (prefab == null)
             {
@@ -93,13 +91,14 @@ namespace SpyQuarrelRuntime
             }
 
             if (client.PlayerObject != null && client.PlayerObject.IsSpawned)
-            {
                 client.PlayerObject.Despawn(true);
-            }
 
-            var pos = GetRoleSpawn(role);
-            
-            Player playerInstance = Instantiate(prefab, pos, Quaternion.identity);
+            Vector3 spawnPosition = GetRoleSpawn(role);
+
+            Player playerInstance = Instantiate(prefab, spawnPosition, Quaternion.identity);
+
+            playerInstance.InitializeSpawnPosition(spawnPosition);
+
             NetworkObject spawnedNetworkObject = playerInstance.GetComponent<NetworkObject>();
 
             if (spawnedNetworkObject == null)
@@ -111,27 +110,38 @@ namespace SpyQuarrelRuntime
 
             spawnedNetworkObject.SpawnAsPlayerObject(clientId, true);
 
-            if (IsOwner)
-            {
+            if (clientId == NetworkManager.Singleton.LocalClientId)
                 LocalPlayer = playerInstance;
-            }
 
-            var playerTarget = RpcTarget.Single(clientId, RpcTargetUse.Temp);
-            
+            RpcParams playerTarget = RpcTarget.Single(clientId, RpcTargetUse.Temp);
             InvokeSuccessfulSpawnRpc(playerTarget);
         }
 
+        [Rpc(SendTo.Everyone)]
+        private void BroadcastMessage(FixedString64Bytes message, RpcParams rpcParams = default
+        )
+        {
+            Debug.Log(message);
+        }
+        
         private Vector3 GetRoleSpawn(PlayerRole role)
         {
-            var spawnPoints = FindObjectsByType<PlayerSpawnPoint>(FindObjectsInactive.Include, FindObjectsSortMode.None)
-                .Where(spawn => spawn.SpawnRole == role).Select(point => point.SpawnPosition) .ToList();
-            
-            var finalPoint = UnityEngine.Random.Range(0, 50);
-            
-            var point = finalPoint % spawnPoints.Count;
-            
-            
-            return spawnPoints[point];
+            var spawnPoints = FindObjectsByType<PlayerSpawnPoint>
+            (
+                FindObjectsInactive.Include,
+                FindObjectsSortMode.None
+            )
+            .Where(spawn => spawn.SpawnRole == role)
+            .ToList();
+
+            if (spawnPoints.Count == 0)
+            {
+                Debug.LogError($"No spawn points found for role: {role}");
+                return Vector3.zero;
+            }
+
+            int index = UnityEngine.Random.Range(0, spawnPoints.Count);
+            return spawnPoints[index].transform.position;
         }
 
         [Rpc(SendTo.SpecifiedInParams)]

@@ -26,6 +26,8 @@ namespace SpyQuarrelRuntime
         private void Awake()
         {
             InitialiseIdentity();
+            
+           // GameNetworkManager
         }
 
         private void Start()
@@ -104,10 +106,16 @@ namespace SpyQuarrelRuntime
             BuildNpc();
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
+            if (!NetworkManager.Singleton) return;
             NetworkManager.Singleton.NetworkTickSystem.Tick -= UpdatePosition;
             NetworkManager.Singleton.NetworkTickSystem.Tick -= UpdateRotation;
+        }
+
+        private void OnDestroy()
+        {
+            
         }
 
         private void OnValidate()
