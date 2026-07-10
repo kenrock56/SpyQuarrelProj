@@ -245,7 +245,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae9c7adc1749df447ac6b9775cd6a59c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <PlayerRole>k__BackingField: 0
+  <PlayerRole>k__BackingField: 1
   _canInteract: 0
   _interactRange: 1000
   _inputController: {fileID: 205327034685397770}

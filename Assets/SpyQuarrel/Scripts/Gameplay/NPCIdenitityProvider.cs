@@ -1,50 +1,62 @@
-using System;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace SpyQuarrelRuntime
 {
     public class NPCIdenitityProvider : MonoBehaviour
     {
-        [field: SerializeField] public NpcType NpcIdentityType { get; private set; }
+        public float RotationYAxis => _rotationEuler.y;
+
+        private Vector3 _rotationEuler;
+
+        [field: SerializeField]
+        public NpcType NpcIdentityType { get; private set; }
 
         private GameObject _root;
         private GameObject _currentIdentity;
 
-        
         [SerializeField] private Transform _followPositionTransform;
-
         [SerializeField] private Transform _followRotationTransform;
-
+        
+        
+        [SerializeField] private RuntimeAnimatorController _animatorController;
+        [SerializeField] private Avatar _avatar;
         [SerializeField] private Animator _animator;
+        [SerializeField]private NetworkAnimator _animatorNetwork;
 
         [Header("Rotation Smoothing")]
         [SerializeField] private float _rotationLerpSpeed = 15f;
-        
-        
+
+        private bool _networkTickRegistered;
+
         private void Awake()
         {
             InitialiseIdentity();
-            
-           // GameNetworkManager
         }
 
         private void Start()
         {
             BuildNpc();
-            if (NetworkManager.Singleton.IsListening)
-            {
-                NetworkManager.Singleton.NetworkTickSystem.Tick += UpdatePosition;
-                NetworkManager.Singleton.NetworkTickSystem.Tick += UpdateRotation;
-            }
+
+            if (NetworkManager.Singleton == null)
+                return;
+
+            if (!NetworkManager.Singleton.IsListening)
+                return;
+
+            NetworkManager.Singleton.NetworkTickSystem.Tick += UpdatePosition;
+            NetworkManager.Singleton.NetworkTickSystem.Tick += UpdateRotation;
+
+            _networkTickRegistered = true;
         }
 
         private void InitialiseIdentity()
         {
-            if (_root != null) return;
+            if (_root != null)
+                return;
 
-            _root = transform.gameObject;
+            _root = gameObject;
         }
 
         private void LateUpdate()
@@ -55,48 +67,91 @@ namespace SpyQuarrelRuntime
 
         private void UpdatePosition()
         {
-            if (_followPositionTransform == null) return;
-            if (_currentIdentity == null) return;
+            if (_followPositionTransform == null)
+                return;
+
+            if (_currentIdentity == null)
+                return;
 
             transform.position = _followPositionTransform.position;
         }
 
         private void UpdateRotation()
         {
-            if (_followRotationTransform == null) return;
-            if (_currentIdentity == null) return;
-            
-            Quaternion targetRotation = _followRotationTransform.rotation;
+            if (_followRotationTransform == null)
+                return;
+
+            if (_currentIdentity == null)
+                return;
+
+            Quaternion targetRotation =
+                _followRotationTransform.rotation;
 
             if (_rotationLerpSpeed <= 0f)
             {
                 transform.rotation = targetRotation;
+                _rotationEuler = transform.eulerAngles;
                 return;
             }
-            
-            float deltaTime = Time.deltaTime;
 
-            float lerpAmount = 1f - Mathf.Exp(-_rotationLerpSpeed * deltaTime);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, lerpAmount);
+            float t = 1f - Mathf.Exp
+            (
+                -_rotationLerpSpeed * Time.deltaTime
+            );
+
+            transform.rotation = Quaternion.Slerp
+            (
+                transform.rotation,
+                targetRotation,
+                t
+            );
+
+            _rotationEuler = transform.eulerAngles;
         }
 
         private void BuildNpc()
         {
-            if (!NpcDictionary.HasInstance) return;
+            if (!NpcDictionary.HasInstance)
+                return;
 
-            if (NpcDictionary.Entries[NpcIdentityType] is { } identity)
+            if (!NpcDictionary.Entries.TryGetValue(
+                    NpcIdentityType,
+                    out GameObject identity))
             {
-                if (_currentIdentity != null)
-                {
-                    Destroy(_currentIdentity);
-                }
+                return;
+            }
 
-                GameObject disguise = Instantiate(identity, _root.transform);
-                disguise.transform.localPosition = Vector3.zero;
-                disguise.transform.localRotation = Quaternion.identity;
+            if (identity == null)
+                return;
 
-                _currentIdentity = disguise;
-                _animator = _currentIdentity.GetComponent<Animator>();
+            if (_currentIdentity != null)
+                Destroy(_currentIdentity);
+
+            GameObject disguise = Instantiate(identity, _root.transform);
+
+            disguise.transform.localPosition = Vector3.zero;
+            disguise.transform.localRotation = Quaternion.identity;
+
+            _currentIdentity = disguise;
+
+            if (_currentIdentity.TryGetComponent(out _animator))
+            {
+                _animator.runtimeAnimatorController = _animatorController;
+                _animator.avatar = _avatar;
+            }
+            
+            if (!_currentIdentity.TryGetComponent(out NetworkAnimator networkAnimator))
+            {
+                _animatorNetwork = _currentIdentity.AddComponent<NetworkAnimator>();
+            }
+            else
+            {
+                _animatorNetwork = networkAnimator;
+            }
+
+            if (_animatorNetwork != null && _animator != null)
+            {
+                _animatorNetwork.Animator = _animator;
             }
         }
 
@@ -108,22 +163,29 @@ namespace SpyQuarrelRuntime
 
         private void OnDisable()
         {
-            if (!NetworkManager.Singleton) return;
-            NetworkManager.Singleton.NetworkTickSystem.Tick -= UpdatePosition;
-            NetworkManager.Singleton.NetworkTickSystem.Tick -= UpdateRotation;
+            UnregisterNetworkTick();
         }
 
         private void OnDestroy()
         {
-            
+            UnregisterNetworkTick();
         }
 
-        private void OnValidate()
+        private void UnregisterNetworkTick()
         {
-            if (Application.isPlaying)
+            if (!_networkTickRegistered)
+                return;
+
+            if (NetworkManager.Singleton != null)
             {
-                // BuildNpc();
+                NetworkManager.Singleton.NetworkTickSystem.Tick -=
+                    UpdatePosition;
+
+                NetworkManager.Singleton.NetworkTickSystem.Tick -=
+                    UpdateRotation;
             }
+
+            _networkTickRegistered = false;
         }
     }
 }

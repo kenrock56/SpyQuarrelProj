@@ -57,10 +57,14 @@ namespace SpyQuarrelRuntime
         {
             Debug.Log("Interact");
             
-            if (GameNetworkManager.HasInstance && GameNetworkManager.Instance.LocalPlayer != null)
+            // if(interactor.PlayerRole != PlayerRole.Sniper)
+            //     return;
+            
+            if (GameNetworkManager.HasInstance)
             {
-                var player = GameNetworkManager.Instance.LocalPlayer;
-                player.Teleport(transform.position);
+                // var player = GameNetworkManager.Instance.LocalPlayer;
+                // player.Teleport(transform.position);
+                GameNetworkManager.Instance.RequestTeleport(transform.position);
             }
         }
 
@@ -68,6 +72,8 @@ namespace SpyQuarrelRuntime
         {
             if (interactor == null)
                 return;
+
+            Debug.Log($"Player Role {interactor.PlayerRole}");
 
             if (interactor.PlayerRole != PlayerRole.Sniper)
                 return;

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using KinematicCharacterController;
 using Unity.Netcode;
@@ -11,7 +12,7 @@ namespace SpyQuarrelRuntime
         [SerializeField] private PlayerCamera _camera;
         [SerializeField] private PlayerCharacter _character;
         [SerializeField] private Transform _playerRoot;
-        [SerializeField] private bool _networkSuccess = false;
+        [SerializeField] protected bool _networkSuccess = false;
 
         private KinematicSimulationBridge _simulationBridge;
 
@@ -142,6 +143,8 @@ namespace SpyQuarrelRuntime
         {
             if (_character != null)
                 _character.UpdateBody(Time.deltaTime);
+            
+            OnUpdate();
 
             if (_networkSuccess && !IsOwner)
                 return;
@@ -168,6 +171,9 @@ namespace SpyQuarrelRuntime
 
         private void FixedUpdate()
         {
+            
+            OnFixedUpdate();
+            
             if (_networkSuccess)
                 return;
 
@@ -180,6 +186,16 @@ namespace SpyQuarrelRuntime
 
             if (!_networkSuccess)
                 KinematicCharacterSystem.Settings.AutoSimulation = true;
+        }
+        
+        protected virtual void OnFixedUpdate(){}
+        protected virtual void OnLateUpdate(){}
+        protected virtual void OnUpdate(){}
+
+
+        private void LateUpdate()
+        {
+            OnLateUpdate();
         }
 
         private void HandleServerTick()
@@ -490,6 +506,12 @@ namespace SpyQuarrelRuntime
             }
 
             SetLayerInChildren("Self");
+
+
+            if (_networkSuccess && GameNetworkManager.HasInstance && GameNetworkManager.Instance.LocalPlayer == null)
+            {
+                GameNetworkManager.Instance.RegisterLocalPlayer(this);
+            }
         }
 
         private void DisableLocalItems()
@@ -499,6 +521,11 @@ namespace SpyQuarrelRuntime
 
             if (_camera != null)
                 _camera.enabled = false;
+
+            if (TryGetComponent(out Interactor interactor))
+            {
+                interactor.enabled = false;
+            }
 
             SetLayerInChildren("Default");
         }

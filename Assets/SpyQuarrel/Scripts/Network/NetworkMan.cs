@@ -24,6 +24,12 @@ namespace SpyQuarrelRuntime
 
         public Player LocalPlayer { get; private set; }
 
+        public void RegisterLocalPlayer(Player player)
+        {
+            LocalPlayer = player;
+            Debug.Log($"LocalPlayer: {player.name}");
+        }
+        
         public void SpawnAsRole(PlayerRole role)
         {
             if (NetworkManager.Singleton == null)
@@ -110,8 +116,8 @@ namespace SpyQuarrelRuntime
 
             spawnedNetworkObject.SpawnAsPlayerObject(clientId, true);
 
-            if (clientId == NetworkManager.Singleton.LocalClientId)
-                LocalPlayer = playerInstance;
+            // if (clientId == NetworkManager.Singleton.LocalClientId)
+            //     LocalPlayer = playerInstance;
 
             RpcParams playerTarget = RpcTarget.Single(clientId, RpcTargetUse.Temp);
             InvokeSuccessfulSpawnRpc(playerTarget);
@@ -148,6 +154,14 @@ namespace SpyQuarrelRuntime
         private void InvokeSuccessfulSpawnRpc(RpcParams rpcParams = default)
         {
             _onSuccessfulSpawn?.Invoke();
+        }
+
+        public void RequestTeleport(Vector3 position)
+        {
+            if (LocalPlayer != null && LocalPlayer is SniperCharacter)
+            {
+                LocalPlayer.Teleport(position);
+            }
         }
     }
 }

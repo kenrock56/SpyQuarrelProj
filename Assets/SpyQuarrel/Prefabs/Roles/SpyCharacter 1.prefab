@@ -112,7 +112,10 @@ MonoBehaviour:
   <NpcIdentityType>k__BackingField: 0
   _followPositionTransform: {fileID: 8091961108214859584}
   _followRotationTransform: {fileID: 3340500467449709153}
+  _animatorController: {fileID: 9100000, guid: 09420304759300e4ca49156ed2e9fcd5, type: 2}
+  _avatar: {fileID: 9000000, guid: 393b2b44f651108499d40c3e3e475234, type: 2}
   _animator: {fileID: 0}
+  _animatorNetwork: {fileID: 0}
   _rotationLerpSpeed: 15
 --- !u!1 &2268584288584546291
 GameObject:
@@ -196,7 +199,7 @@ MonoBehaviour:
   _requestedCrouch: 0
   _requestedCrouchInAir: 0
   _jumpHeldLastFrame: 0
-  _walkSpeed: 12
+  _walkSpeed: 5
   _jumpSpeed: 12
   _jumpWindowTime: 0.2
   _jumpSustainMultiplier: 0.55
@@ -502,6 +505,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _directionReference: {fileID: 5507612231242530103}
+  _remoteRotationLerpSpeed: 15
 --- !u!1 &5809524054673744692
 GameObject:
   m_ObjectHideFlags: 0
@@ -609,6 +613,10 @@ MonoBehaviour:
   _serverStateBuffer:
     _buffer: []
     _bufferSize: 1024
+  _provider: {fileID: 0}
+  _playerDisguise: {fileID: 0}
+  _minimumRotationDifference: 0.25
+  _maximumUpdatesPerSecond: 20
 --- !u!114 &3489075128166846139
 MonoBehaviour:
   m_ObjectHideFlags: 0
