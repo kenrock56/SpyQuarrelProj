@@ -435,7 +435,7 @@ GameObject:
   - component: {fileID: 5329125646160104383}
   - component: {fileID: 3632821167418433047}
   - component: {fileID: 6897662061309199010}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Character (has Player Character and KCC Motor)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
