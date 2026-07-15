@@ -3,7 +3,7 @@ using KinematicCharacterController;
 
 namespace SpyQuarrelRuntime
 {
-    public class PlayerCharacter : MonoBehaviour, ICharacterController
+    public class PlayerCharacter : MonoBehaviour, ICharacterController, IAnimatorContext
     {
         [Header("Initial References")]
         [Space(5)]
@@ -678,5 +678,8 @@ namespace SpyQuarrelRuntime
         //
         //     return Quaternion.Slerp(currentRotation, targetRotation, t);
         // }
+        public Vector3 Velocity => _motor.Velocity;
+        public float Speed => _motor.BaseVelocity.magnitude;
+        public Vector3 ForwardDirection => _motor.CharacterForward;
     }
 }

@@ -6,12 +6,14 @@ namespace SpyQuarrelRuntime
 {
     public class NPCIdenitityProvider : MonoBehaviour
     {
+        private static readonly int Speed = Animator.StringToHash("Speed");
         public float RotationYAxis => _rotationEuler.y;
 
         private Vector3 _rotationEuler;
 
-        [field: SerializeField]
-        public NpcType NpcIdentityType { get; private set; }
+        [field:SerializeField] private IAnimatorContext _animatorContext;
+        
+        [field: SerializeField] public NpcType NpcIdentityType { get; private set; }
 
         private GameObject _root;
         private GameObject _currentIdentity;
@@ -33,6 +35,7 @@ namespace SpyQuarrelRuntime
         private void Awake()
         {
             InitialiseIdentity();
+            
         }
 
         private void Start()
@@ -53,6 +56,17 @@ namespace SpyQuarrelRuntime
 
         private void InitialiseIdentity()
         {
+            _animatorContext = transform.root.GetComponentInChildren<IAnimatorContext>();
+
+            if (_animatorContext == null)
+            {
+                Debug.LogError("No animator context found on the root object");
+            }
+            else
+            {
+                Debug.Log("Animator context found on the root object");
+            }
+            
             if (_root != null)
                 return;
 
@@ -63,7 +77,10 @@ namespace SpyQuarrelRuntime
         {
             UpdatePosition();
             UpdateRotation();
+            UpdateAnimator();
         }
+
+        
 
         private void UpdatePosition()
         {
@@ -107,6 +124,14 @@ namespace SpyQuarrelRuntime
             );
 
             _rotationEuler = transform.eulerAngles;
+        }
+        
+        private void UpdateAnimator()
+        {
+            if (_animator == null)return;
+            if(_animatorContext == null)return;
+            
+            _animator.SetFloat(Speed, _animatorContext.Speed);
         }
 
         private void BuildNpc()
