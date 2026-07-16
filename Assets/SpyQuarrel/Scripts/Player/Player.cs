@@ -13,7 +13,8 @@ namespace SpyQuarrelRuntime
         [SerializeField] private PlayerCharacter _character;
         [SerializeField] private Transform _playerRoot;
         [SerializeField] protected bool _networkSuccess = false;
-
+        
+        
         private KinematicSimulationBridge _simulationBridge;
 
         [SerializeField] private int _bufferSize = 1024;

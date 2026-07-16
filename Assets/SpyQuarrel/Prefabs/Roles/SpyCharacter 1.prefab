@@ -109,13 +109,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 503f8909b0233d84d9869c629b9282a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <NpcIdentityType>k__BackingField: 0
+  <NpcIdentityType>k__BackingField: 2
   _followPositionTransform: {fileID: 8091961108214859584}
   _followRotationTransform: {fileID: 3340500467449709153}
   _animatorController: {fileID: 9100000, guid: 09420304759300e4ca49156ed2e9fcd5, type: 2}
   _avatar: {fileID: 9000000, guid: 393b2b44f651108499d40c3e3e475234, type: 2}
-  _animator: {fileID: 0}
-  _animatorNetwork: {fileID: 0}
   _rotationLerpSpeed: 15
 --- !u!1 &2268584288584546291
 GameObject:
@@ -613,8 +611,8 @@ MonoBehaviour:
   _serverStateBuffer:
     _buffer: []
     _bufferSize: 1024
-  _provider: {fileID: 0}
-  _playerDisguise: {fileID: 0}
+  _provider: {fileID: 1319377497183581525}
+  _playerDisguise: {fileID: 3193604553710358094}
   _minimumRotationDifference: 0.25
   _maximumUpdatesPerSecond: 20
 --- !u!114 &3489075128166846139
