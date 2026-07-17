@@ -4,72 +4,77 @@ namespace SpyQuarrelRuntime
 {
     public class NPCIdenitityProvider : MonoBehaviour
     {
-        private static readonly int SpeedHash = Animator.StringToHash("Speed");
+        private bool _initialized;
 
-        [Header("Identity")]
+        private static readonly int Speed = Animator.StringToHash("Speed");
+
+        public float RotationYAxis => _rotationEuler.y;
+
+        private Vector3 _rotationEuler;
+
+        [field: SerializeField]
+        private IAnimatorContext _animatorContext;
+
         [field: SerializeField]
         public NpcType NpcIdentityType { get; private set; }
 
-        [Header("Follow References")]
+        public Animator CurrentAnimator => _animator;
+
+        private GameObject _root;
+        private GameObject _currentIdentity;
+
         [SerializeField] private Transform _followPositionTransform;
         [SerializeField] private Transform _followRotationTransform;
 
-        [Header("Animator Setup")]
-        [SerializeField] private RuntimeAnimatorController _animatorController;
-        [SerializeField] private Avatar _avatar;
-        
-        private IAnimatorContext _animatorContext;
+        [SerializeField] private Animator _animator;
 
         [Header("Rotation Smoothing")]
         [SerializeField] private float _rotationLerpSpeed = 15f;
 
-        private GameObject _root;
-        private GameObject _currentIdentity;
-        private Animator _animator;
-
-        private Vector3 _rotationEuler;
-        private float _currentAnimatorSpeed;
-
-        private bool _initialized;
-        private bool _appearanceQueued;
-        private NpcType _queuedAppearance;
-
-        public float RotationYAxis => _rotationEuler.y;
-        public Animator CurrentAnimator => _animator;
-        public GameObject CurrentIdentity => _currentIdentity;
-        public bool IsInitialized => _initialized;
-
         private void Awake()
         {
-            InitializeIdentity();
+            InitialiseIdentity();
+            BuildNpc();
         }
 
-        private void Start()
+        private void InitialiseIdentity()
         {
-            
+            _animatorContext =
+                transform.root.GetComponentInChildren<IAnimatorContext>();
+
+            if (_animatorContext == null)
+            {
+                Debug.LogError(
+                    "[NPCIdentityProvider] No animator context found.",
+                    this
+                );
+            }
+
+            _root = gameObject;
         }
 
         private void LateUpdate()
         {
             UpdatePosition();
             UpdateRotation();
-            ProcessQueuedAppearanceChange();
-            ApplyAnimatorSpeed();
         }
 
-        private void InitializeIdentity()
+        public void UpdateLocal()
         {
-            _animatorContext = transform.root.GetComponentInChildren<IAnimatorContext>();
-            
-            if (_root != null)
-                return;
+            UpdateAnimator();
+        }
 
-            _root = gameObject;
+        public void UpdateRemote()
+        {
+            
         }
 
         private void UpdatePosition()
         {
             if (_followPositionTransform == null)
+                return;
+
+            if (_currentIdentity == null)
                 return;
 
             transform.position = _followPositionTransform.position;
@@ -80,94 +85,62 @@ namespace SpyQuarrelRuntime
             if (_followRotationTransform == null)
                 return;
 
-            Quaternion targetRotation = _followRotationTransform.rotation;
+            if (_currentIdentity == null)
+                return;
+
+            Quaternion targetRotation =
+                _followRotationTransform.rotation;
 
             if (_rotationLerpSpeed <= 0f)
             {
                 transform.rotation = targetRotation;
+                _rotationEuler = transform.eulerAngles;
+                return;
             }
-            else
-            {
-                float t =
-                    1f - Mathf.Exp(-_rotationLerpSpeed * Time.deltaTime);
 
-                transform.rotation = Quaternion.Slerp
-                (
-                    transform.rotation,
-                    targetRotation,
-                    t
-                );
-            }
+            float t =
+                1f - Mathf.Exp(-_rotationLerpSpeed * Time.deltaTime);
+
+            transform.rotation = Quaternion.Slerp
+            (
+                transform.rotation,
+                targetRotation,
+                t
+            );
 
             _rotationEuler = transform.eulerAngles;
         }
 
-        /// <summary>
-        /// Applies the networked or locally calculated speed to the
-        /// currently active identity Animator.
-        /// </summary>
-        public void SetAnimatorSpeed(float speed)
-        {
-            _currentAnimatorSpeed = speed;
-        }
-
-        private void ApplyAnimatorSpeed()
+        private void UpdateAnimator()
         {
             if (_animator == null)
                 return;
-            
-            if(_animatorContext == null)return;
 
-            SetAnimatorSpeed(_animatorContext.Speed);
-
-            _animator.SetFloat(SpeedHash, _currentAnimatorSpeed);
-        }
-
-        public void SetAppearance(NpcType npcIdentityType)
-        {
-            QueueAppearanceChange(npcIdentityType);
-        }
-
-        private void QueueAppearanceChange(NpcType npcIdentityType)
-        {
-            _queuedAppearance = npcIdentityType;
-            _appearanceQueued = true;
-        }
-
-        private void ProcessQueuedAppearanceChange()
-        {
-            if (!_appearanceQueued)
+            if (_animatorContext == null)
                 return;
 
-            _appearanceQueued = false;
-            NpcIdentityType = _queuedAppearance;
-
-            BuildNpc();
+            _animator.SetFloat
+            (
+                Speed,
+                _animatorContext.Speed
+            );
         }
 
         [ContextMenu("Build Npc")]
-        public void BuildNpc()
+        private void BuildNpc()
         {
             if (!NpcDictionary.HasInstance)
-            {
-                Debug.LogWarning
-                (
-                    "[NPCIdenitityProvider] NpcDictionary is not available.",
-                    this
-                );
-
                 return;
-            }
 
             if (!NpcDictionary.Entries.TryGetValue
-                (
-                    NpcIdentityType,
-                    out GameObject identityPrefab
-                ))
+            (
+                NpcIdentityType,
+                out GameObject identityPrefab
+            ))
             {
                 Debug.LogError
                 (
-                    $"[NPCIdenitityProvider] No identity found for {NpcIdentityType}.",
+                    $"[NPCIdentityProvider] Missing identity '{NpcIdentityType}'.",
                     this
                 );
 
@@ -175,83 +148,47 @@ namespace SpyQuarrelRuntime
             }
 
             if (identityPrefab == null)
+                return;
+
+            if (_currentIdentity != null)
+            {
+                Destroy(_currentIdentity);
+            }
+
+            _currentIdentity =
+                Instantiate(identityPrefab, _root.transform);
+
+            _currentIdentity.transform.localPosition = Vector3.zero;
+            _currentIdentity.transform.localRotation = Quaternion.identity;
+            _currentIdentity.transform.localScale = Vector3.one;
+
+            _animator =
+                _currentIdentity.GetComponentInChildren<Animator>(true);
+
+            if (_animator == null)
             {
                 Debug.LogError
                 (
-                    $"[NPCIdenitityProvider] Identity prefab for {NpcIdentityType} is null.",
-                    this
+                    $"[NPCIdentityProvider] '{identityPrefab.name}' has no Animator.",
+                    _currentIdentity
                 );
 
                 return;
             }
 
-            GameObject previousIdentity = _currentIdentity;
-
-            GameObject newIdentity = Instantiate
-            (
-                identityPrefab,
-                _root.transform
-            );
-
-            newIdentity.name = $"{identityPrefab.name}_Identity";
-
-            Transform identityTransform = newIdentity.transform;
-
-            identityTransform.localPosition = Vector3.zero;
-            identityTransform.localRotation = Quaternion.identity;
-            identityTransform.localScale = Vector3.one;
-
-            Animator newAnimator =
-                newIdentity.GetComponentInChildren<Animator>(true);
-
-            if (newAnimator == null)
-            {
-                Debug.LogError
-                (
-                    $"[NPCIdenitityProvider] Identity '{identityPrefab.name}' has no Animator.",
-                    newIdentity
-                );
-
-                Destroy(newIdentity);
-                return;
-            }
-
-            ConfigureAnimator(newAnimator);
-
-            _currentIdentity = newIdentity;
-            _animator = newAnimator;
             _initialized = true;
-
-            // Immediately apply the most recent replicated speed so the
-            // replacement model starts in the correct animation state.
-            _animator.SetFloat(SpeedHash, _currentAnimatorSpeed);
-
-            if (previousIdentity != null)
-            {
-                Destroy(previousIdentity);
-            }
         }
 
-        private void ConfigureAnimator(Animator targetAnimator)
+        public void SetAppearance(NpcType npcIdentityType)
         {
-            if (targetAnimator == null)
+            if (NpcIdentityType == npcIdentityType &&
+                _currentIdentity != null)
+            {
                 return;
-
-            targetAnimator.enabled = true;
-
-            if (_animatorController != null)
-            {
-                targetAnimator.runtimeAnimatorController =
-                    _animatorController;
             }
 
-            if (_avatar != null)
-            {
-                targetAnimator.avatar = _avatar;
-            }
-
-            targetAnimator.Rebind();
-            targetAnimator.Update(0f);
+            NpcIdentityType = npcIdentityType;
+            BuildNpc();
         }
 
         private void OnValidate()
@@ -262,7 +199,7 @@ namespace SpyQuarrelRuntime
             if (!_initialized)
                 return;
 
-            QueueAppearanceChange(NpcIdentityType);
+            SetAppearance(NpcIdentityType);
         }
     }
 }

@@ -8,8 +8,7 @@ namespace SpyQuarrelRuntime
         [Header("Disguise References")]
         [SerializeField] private NPCIdenitityProvider _provider;
         [SerializeField] private PlayerDisguise _playerDisguise;
-        
-        
+
         [Header("Network Orientation")]
         [SerializeField] private float _minimumRotationDifference = 0.25f;
         [SerializeField] private float _maximumUpdatesPerSecond = 20f;
@@ -28,19 +27,14 @@ namespace SpyQuarrelRuntime
         {
             base.OnNetworkSpawn();
 
-            if (_playerDisguise == null)
-            {
-                _playerDisguise =
-                    GetComponentInChildren<PlayerDisguise>(true);
-            }
-
-            if (_provider == null)
-            {
-                _provider =
-                    GetComponentInChildren<NPCIdenitityProvider>(true);
-            }
+            FindMissingReferences();
 
             _networkRotationY.OnValueChanged += OnNetworkRotationChanged;
+
+            if (_provider != null)
+            {
+                _provider.SetAppearance(_provider.NpcIdentityType);
+            }
 
             if (_playerDisguise == null)
             {
@@ -94,6 +88,7 @@ namespace SpyQuarrelRuntime
             if (IsOwner)
             {
                 UpdateOwnerOrientation();
+                _provider.UpdateLocal();
             }
             else
             {
@@ -109,6 +104,29 @@ namespace SpyQuarrelRuntime
         protected override void OnFixedUpdate()
         {
             base.OnFixedUpdate();
+        }
+
+        private void FindMissingReferences()
+        {
+            if (_playerDisguise == null)
+            {
+                _playerDisguise =
+                    GetComponentInChildren<PlayerDisguise>(true);
+            }
+
+            if (_provider == null)
+            {
+                _provider =
+                    GetComponentInChildren<NPCIdenitityProvider>(true);
+            }
+        }
+
+        public void SetAppearance(NpcType identity)
+        {
+            if (_provider == null)
+                return;
+
+            _provider.SetAppearance(identity);
         }
 
         private void UpdateOwnerOrientation()
@@ -171,19 +189,30 @@ namespace SpyQuarrelRuntime
             }
 
             if (IsOwner)
+            {
                 SendRotationRpc(yRot);
+            }
         }
 
-        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
+        [Rpc
+        (
+            SendTo.Server,
+            InvokePermission = RpcInvokePermission.Owner
+        )]
         private void SendRotationRpc(float yRot)
         {
             if (!IsServer)
                 return;
 
-            _networkRotationY.Value = Mathf.Repeat(yRot, 360f);
+            _networkRotationY.Value =
+                Mathf.Repeat(yRot, 360f);
         }
 
-        private void OnNetworkRotationChanged(float previousValue, float newValue)
+        private void OnNetworkRotationChanged
+        (
+            float previousValue,
+            float newValue
+        )
         {
             if (IsOwner)
                 return;
@@ -191,22 +220,18 @@ namespace SpyQuarrelRuntime
             UpdateProviderRot(newValue);
         }
 
-        /// <summary>
-        /// Allows another owner-side system to force a new disguise
-        /// orientation without sending movement input.
-        /// </summary>
         public void OverrideOrientation(float yRot)
         {
             yRot = Mathf.Repeat(yRot, 360f);
 
             if (_playerDisguise != null)
+            {
                 _playerDisguise.SetRotationImmediate(yRot);
+            }
 
             _lastSubmittedRotation = yRot;
 
             UpdateRotEuler(yRot);
         }
-
-        
     }
 }
