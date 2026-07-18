@@ -4,24 +4,22 @@ using UnityEngine.AI;
 
 namespace SpyQuarrelRuntime
 {
-    public class NPCharacter : NetworkBehaviour, IAnimatorContext, IInteractable
+    public class NPCharacter :
+        NetworkBehaviour,
+        IAnimatorContext,
+        IInteractable
     {
-
         public string InteractName => "Jeff";
-        public string InteractDescription => "press blah to blah";
+
+        public string InteractDescription =>
+            "press blah to blah";
+
         public bool IsInteractable => true;
-        
-        private readonly NetworkVariable<int> _animatorState = new
-        (
-            0,
-            NetworkVariableReadPermission.Everyone,
-            NetworkVariableWritePermission.Owner
-        );
 
         [Header("References")]
         [SerializeField] private NavMeshAgent _agent;
-        [SerializeField] private NPCIdenitityProvider _identityProvider;
-        [SerializeField] private Animator _animatorRef;
+        [SerializeField]
+        private NPCIdenitityProvider _identityProvider;
 
         [Header("Movement")]
         [SerializeField] private float _arrivalDistance = 0.5f;
@@ -30,12 +28,10 @@ namespace SpyQuarrelRuntime
 
         [Header("Network Snapshots")]
         [SerializeField] private float _snapshotRate = 15f;
-        [SerializeField] private float _remotePositionLerpSpeed = 15f;
-        [SerializeField] private float _remoteRotationLerpSpeed = 15f;
-
-        [Header("Animation Synchronization")]
-        [SerializeField] private int _animatorLayer = 0;
-        [SerializeField] private float _animationCrossFadeDuration = 0.31f;
+        [SerializeField]
+        private float _remotePositionLerpSpeed = 15f;
+        [SerializeField]
+        private float _remoteRotationLerpSpeed = 15f;
 
         private Vector3 _networkTargetPosition;
         private float _networkTargetYaw;
@@ -44,15 +40,23 @@ namespace SpyQuarrelRuntime
         private float _nextSnapshotTime;
         private bool _hasReceivedSnapshot;
 
-        private int _lastWrittenAnimatorState;
-        private int _lastAppliedAnimatorState;
+        private readonly NetworkVariable<NpcType> _networkAppearance = new
+        (
+            default,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Server
+        );
 
         public Vector3 Velocity
         {
             get
             {
-                if (IsServer && _agent != null && _agent.enabled)
+                if (IsServer &&
+                    _agent != null &&
+                    _agent.enabled)
+                {
                     return _agent.velocity;
+                }
 
                 return _networkVelocity;
             }
@@ -63,7 +67,11 @@ namespace SpyQuarrelRuntime
             get
             {
                 Vector3 velocity = Velocity;
-                return new Vector2(velocity.x, velocity.z).magnitude;
+
+                return new Vector2(
+                    velocity.x,
+                    velocity.z
+                ).magnitude;
             }
         }
 
@@ -78,31 +86,16 @@ namespace SpyQuarrelRuntime
         {
             if (_agent == null)
             {
-                _agent = transform.root.GetComponentInChildren<NavMeshAgent>(true);
+                _agent = transform.root
+                    .GetComponentInChildren<NavMeshAgent>(true);
             }
 
             if (_identityProvider == null)
             {
-                _identityProvider =
-                    transform.root.GetComponentInChildren<NPCIdenitityProvider>(true);
+                _identityProvider = transform.root
+                    .GetComponentInChildren<NPCIdenitityProvider>(true);
             }
-
-            CacheAnimator();
         }
-
-        private void CacheAnimator()
-        {
-            if (_identityProvider != null &&
-                _identityProvider.CurrentAnimator != null)
-            {
-                _animatorRef = _identityProvider.CurrentAnimator;
-                return;
-            }
-
-            _animatorRef =
-                transform.root.GetComponentInChildren<Animator>(true);
-        }
-        
 
         public override void OnNetworkSpawn()
         {
@@ -110,7 +103,8 @@ namespace SpyQuarrelRuntime
 
             FindMissingReferences();
 
-            _animatorState.OnValueChanged += OnAnimatorStateChanged;
+            _networkAppearance.OnValueChanged +=
+                OnNetworkAppearanceChanged;
 
             if (_agent == null)
             {
@@ -126,9 +120,20 @@ namespace SpyQuarrelRuntime
             {
                 _agent.enabled = true;
 
-                _networkTargetPosition = transform.position;
-                _networkTargetYaw = transform.eulerAngles.y;
-                _networkVelocity = Vector3.zero;
+                _networkTargetPosition =
+                    transform.position;
+
+                _networkTargetYaw =
+                    transform.eulerAngles.y;
+
+                _networkVelocity =
+                    Vector3.zero;
+
+                if (_identityProvider != null)
+                {
+                    _networkAppearance.Value =
+                        _identityProvider.NpcIdentityType;
+                }
 
                 ChooseNewDestination();
                 SendSnapshotImmediately();
@@ -137,39 +142,28 @@ namespace SpyQuarrelRuntime
             {
                 _agent.enabled = false;
 
-                _networkTargetPosition = transform.position;
-                _networkTargetYaw = transform.eulerAngles.y;
-                _networkVelocity = Vector3.zero;
+                _networkTargetPosition =
+                    transform.position;
+
+                _networkTargetYaw =
+                    transform.eulerAngles.y;
+
+                _networkVelocity =
+                    Vector3.zero;
             }
 
             if (_identityProvider != null)
             {
-                SetAppearence(_identityProvider.NpcIdentityType);
+                ApplyAppearance(_networkAppearance.Value);
             }
         }
 
         public override void OnNetworkDespawn()
         {
-            _animatorState.OnValueChanged -= OnAnimatorStateChanged;
+            _networkAppearance.OnValueChanged -=
+                OnNetworkAppearanceChanged;
 
             base.OnNetworkDespawn();
-        }
-
-        public void SetAppearence(NpcType identity)
-        {
-            if (_identityProvider == null)
-                return;
-
-            _identityProvider.SetAppearance(identity);
-
-            /*
-             * The provider processes its queued appearance change during
-             * LateUpdate, so the new Animator may not exist immediately.
-             * UpdateAnimatorState will keep trying to cache it.
-             */
-            _animatorRef = null;
-            _lastWrittenAnimatorState = 0;
-            _lastAppliedAnimatorState = 0;
         }
 
         private void Update()
@@ -180,105 +174,105 @@ namespace SpyQuarrelRuntime
             if (IsServer)
             {
                 UpdateServerMovement();
+                _identityProvider?.UpdateLocal();
             }
             else
             {
                 UpdateRemoteTransform();
+                _identityProvider?.UpdateRemote();
             }
-
-            UpdateAnimatorState();
         }
 
-        private void UpdateAnimatorState()
+        public void SetAppearance(NpcType identity)
         {
-            if (_animatorRef == null)
-            {
-                CacheAnimator();
+            if (_identityProvider == null)
+                return;
 
-                if (_animatorRef == null)
-                    return;
+            if (!IsSpawned)
+            {
+                ApplyAppearance(identity);
+                return;
             }
 
-            if (IsOwner)
+            if (IsServer)
             {
-                WriteAnimatorState();
+                SetAppearanceServer(identity);
             }
             else
             {
-                ApplyAnimatorState();
+                RequestSetAppearanceRpc(identity);
             }
         }
 
-        private void WriteAnimatorState()
+        // Keeps compatibility with the previous spelling.
+        public void SetAppearence(NpcType identity)
         {
-            int currentState = GetAnimState();
-
-            if (currentState == 0)
-                return;
-
-            if (currentState == _lastWrittenAnimatorState)
-                return;
-
-            _lastWrittenAnimatorState = currentState;
-            _animatorState.Value = currentState;
+            SetAppearance(identity);
         }
 
-        private void ApplyAnimatorState()
+        private void SetAppearanceServer(NpcType identity)
         {
-            int targetState = _animatorState.Value;
-
-            if (targetState == 0)
+            if (!IsServer)
                 return;
 
-            if (targetState == _lastAppliedAnimatorState)
-                return;
+            bool valueChanged =
+                !_networkAppearance.Value.Equals(identity);
 
-            AnimatorStateInfo currentState =
-                _animatorRef.GetCurrentAnimatorStateInfo(_animatorLayer);
+            _networkAppearance.Value = identity;
 
-            if (currentState.fullPathHash == targetState)
+            if (!valueChanged)
             {
-                _lastAppliedAnimatorState = targetState;
-                return;
+                ApplyAppearance(identity);
+                RebuildAppearanceRpc(identity);
             }
-
-            _lastAppliedAnimatorState = targetState;
-
-            _animatorRef.CrossFade(targetState, _animationCrossFadeDuration, _animatorLayer);
         }
 
-        private void OnAnimatorStateChanged(int previousState, int newState) {
-            if (IsOwner)
+        [Rpc(
+            SendTo.Server,
+            InvokePermission = RpcInvokePermission.Everyone
+        )]
+        private void RequestSetAppearanceRpc(NpcType identity)
+        {
+            SetAppearanceServer(identity);
+        }
+
+        [Rpc(SendTo.NotServer)]
+        private void RebuildAppearanceRpc(NpcType identity)
+        {
+            ApplyAppearance(identity);
+        }
+
+        private void OnNetworkAppearanceChanged(
+            NpcType previousIdentity,
+            NpcType newIdentity)
+        {
+            ApplyAppearance(newIdentity);
+        }
+
+        private void ApplyAppearance(NpcType identity)
+        {
+            if (_identityProvider == null)
                 return;
 
-            /*
-             * Reset this so UpdateAnimatorState applies the newly received
-             * state as soon as the local Animator is available.
-             */
-            _lastAppliedAnimatorState = 0;
-        }
-
-        private int GetAnimState()
-        {
-            if (_animatorRef == null)
-                return 0;
-
-            AnimatorStateInfo state =
-                _animatorRef.GetCurrentAnimatorStateInfo(_animatorLayer);
-
-            /*
-             * fullPathHash matches Animator.CrossFade(int) reliably when
-             * using the same Animator Controller on every peer.
-             */
-            return state.fullPathHash;
+            _identityProvider.SetAppearance(identity);
         }
 
         private void UpdateServerMovement()
         {
-            if (!_agent.pathPending && _agent.hasPath && _agent.remainingDistance <= 
-                Mathf.Max(_agent.stoppingDistance, _arrivalDistance)) { ChooseNewDestination(); }
+            bool reachedDestination =
+                !_agent.pathPending &&
+                _agent.hasPath &&
+                _agent.remainingDistance <=
+                Mathf.Max(
+                    _agent.stoppingDistance,
+                    _arrivalDistance
+                );
 
-            if (!_agent.pathPending && !_agent.hasPath)
+            bool hasNoPath =
+                !_agent.pathPending &&
+                !_agent.hasPath;
+
+            if (reachedDestination || hasNoPath)
             {
                 ChooseNewDestination();
             }
@@ -286,10 +280,17 @@ namespace SpyQuarrelRuntime
             if (Time.time < _nextSnapshotTime)
                 return;
 
-            float interval = 1f / Mathf.Max(1f, _snapshotRate);
-            _nextSnapshotTime = Time.time + interval;
+            float interval =
+                1f / Mathf.Max(1f, _snapshotRate);
 
-            SendSnapshotRpc(transform.position, transform.eulerAngles.y, _agent.velocity);
+            _nextSnapshotTime =
+                Time.time + interval;
+
+            SendSnapshotRpc(
+                transform.position,
+                transform.eulerAngles.y,
+                _agent.velocity
+            );
         }
 
         private void UpdateRemoteTransform()
@@ -297,15 +298,36 @@ namespace SpyQuarrelRuntime
             if (!_hasReceivedSnapshot)
                 return;
 
-            float positionT = 1f - Mathf.Exp(-_remotePositionLerpSpeed * Time.deltaTime);
+            float positionT =
+                1f - Mathf.Exp(
+                    -_remotePositionLerpSpeed *
+                    Time.deltaTime
+                );
 
-            float rotationT = 1f - Mathf.Exp(-_remoteRotationLerpSpeed * Time.deltaTime);
+            float rotationT =
+                1f - Mathf.Exp(
+                    -_remoteRotationLerpSpeed *
+                    Time.deltaTime
+                );
 
-            transform.position = Vector3.Lerp(transform.position, _networkTargetPosition, positionT);
+            transform.position = Vector3.Lerp(
+                transform.position,
+                _networkTargetPosition,
+                positionT
+            );
 
-            Quaternion targetRotation = Quaternion.Euler(0f, _networkTargetYaw, 0f);
+            Quaternion targetRotation =
+                Quaternion.Euler(
+                    0f,
+                    _networkTargetYaw,
+                    0f
+                );
 
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationT);
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                rotationT
+            );
         }
 
         public void RequestRandomDestination()
@@ -340,45 +362,78 @@ namespace SpyQuarrelRuntime
 
         public void Interact(Interactor interactor)
         {
-            if (interactor.transform.root.TryGetComponent(out SpyCharacter character))
+            if (interactor == null)
+                return;
+
+            if (interactor.transform.root.TryGetComponent(
+                    out SpyCharacter spyCharacter))
             {
-                
+                // Add interaction behaviour here.
             }
         }
 
-        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        [Rpc(
+            SendTo.Server,
+            InvokePermission = RpcInvokePermission.Everyone
+        )]
         private void RequestRandomDestinationRpc()
         {
             ChooseNewDestination();
         }
 
-        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-        private void RequestDestinationRpc(Vector3 destination)
+        [Rpc(
+            SendTo.Server,
+            InvokePermission = RpcInvokePermission.Everyone
+        )]
+        private void RequestDestinationRpc(
+            Vector3 destination)
         {
             TrySetDestination(destination);
         }
 
         private void ChooseNewDestination()
         {
-            if (!IsServer || _agent == null || !_agent.enabled)
+            if (!IsServer ||
+                _agent == null ||
+                !_agent.enabled)
+            {
                 return;
+            }
 
-            var x = Random.Range(-_randomRange, _randomRange);
-            var z = Random.Range(-_randomRange, _randomRange);
-            
-            Vector3 randomPosition = new Vector3(x, transform.position.y, z);
+            float x = Random.Range(
+                -_randomRange,
+                _randomRange
+            );
+
+            float z = Random.Range(
+                -_randomRange,
+                _randomRange
+            );
+
+            Vector3 randomPosition = new Vector3(
+                x,
+                transform.position.y,
+                z
+            );
 
             TrySetDestination(randomPosition);
         }
 
-        private bool TrySetDestination(Vector3 requestedPosition)
+        private bool TrySetDestination(
+            Vector3 requestedPosition)
         {
-            if (!IsServer || _agent == null || !_agent.enabled)
+            if (!IsServer ||
+                _agent == null ||
+                !_agent.enabled)
+            {
                 return false;
+            }
 
-            if (!NavMesh.SamplePosition
-                (requestedPosition, out NavMeshHit hit, _navMeshSampleRadius, NavMesh.AllAreas
-                ))
+            if (!NavMesh.SamplePosition(
+                    requestedPosition,
+                    out NavMeshHit hit,
+                    _navMeshSampleRadius,
+                    NavMesh.AllAreas))
             {
                 return false;
             }
@@ -390,21 +445,29 @@ namespace SpyQuarrelRuntime
         {
             if (!IsServer)
                 return;
-            
-            Vector3 velocity = _agent != null && _agent.enabled ? _agent.velocity : Vector3.zero;
 
-            SendSnapshotRpc(transform.position, transform.eulerAngles.y, velocity);
+            Vector3 velocity =
+                _agent != null && _agent.enabled
+                    ? _agent.velocity
+                    : Vector3.zero;
+
+            SendSnapshotRpc(
+                transform.position,
+                transform.eulerAngles.y,
+                velocity
+            );
         }
 
         [Rpc(SendTo.NotServer)]
-        private void SendSnapshotRpc(Vector3 position, float yaw, Vector3 velocity)
+        private void SendSnapshotRpc(
+            Vector3 position,
+            float yaw,
+            Vector3 velocity)
         {
             _networkTargetPosition = position;
             _networkTargetYaw = yaw;
             _networkVelocity = velocity;
             _hasReceivedSnapshot = true;
         }
-
-       
     }
 }
