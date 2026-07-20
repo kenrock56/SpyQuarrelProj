@@ -7,7 +7,7 @@ namespace SpyQuarrelRuntime
 {
     public class SpyCharacter : Player
     {
-        [Header("Disguise References")]
+        [Header("Disguise Refs")]
         [SerializeField] private NPCIdenitityProvider _provider;
         [SerializeField] private PlayerDisguise _playerDisguise;
 
@@ -18,93 +18,65 @@ namespace SpyQuarrelRuntime
         private float _lastSubmittedRotation;
         private float _nextRotationUpdateTime;
 
-        private readonly NetworkVariable<float> _networkRotationY = new
-        (
-            0f,
-            NetworkVariableReadPermission.Everyone,
-            NetworkVariableWritePermission.Server
-        );
+        private readonly NetworkVariable<float> _networkRotationY = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
-        private readonly NetworkVariable<NpcType> _networkAppearance = new
-        (
-            default,
-            NetworkVariableReadPermission.Everyone,
-            NetworkVariableWritePermission.Server
-        );
+        private readonly NetworkVariable<NpcType> _networkAppearance = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
 
-            FindMissingReferences();
+            InitComponents();
 
-            _networkRotationY.OnValueChanged +=
-                OnNetworkRotationChanged;
+            _networkRotationY.OnValueChanged += OnRotationUpdate;
 
-            _networkAppearance.OnValueChanged +=
-                OnNetworkAppearanceChanged;
+            _networkAppearance.OnValueChanged += OnAppearanceChange;
 
             if (_provider == null)
             {
-                Debug.LogError(
-                    "[SpyCharacter] NPCIdentityProvider is missing.",
-                    this
-                );
+                Debug.LogError("[SpyCharacter] NPCIdentityProvider is missing.", this);
             }
 
             if (_playerDisguise == null)
             {
-                Debug.LogError(
-                    "[SpyCharacter] PlayerDisguise reference is missing.",
-                    this
-                );
-
+                Debug.LogError("[SpyCharacter] PlayerDisguise reference is missing.", this);
                 return;
-            }
-
-            if (IsServer && _provider != null)
-            {
-                _networkAppearance.Value =
-                    _provider.NpcIdentityType;
-            }
-
-            if (_provider != null)
-            {
-                ApplyAppearance(_networkAppearance.Value);
             }
 
             if (IsOwner)
             {
-                float currentRotation =
-                    _playerDisguise.RotationYAxis;
+                if (_provider != null)
+                {
+                    _networkAppearance.Value = _provider.NpcIdentityType;
+
+                    ApplyAppearance(_networkAppearance.Value);
+                    _provider.UpdateLocal();
+                }
+
+                float currentRotation = _playerDisguise.RotationYAxis;
 
                 _lastSubmittedRotation = currentRotation;
 
-                if (IsServer)
-                {
-                    _networkRotationY.Value =
-                        currentRotation;
-                }
-                else
-                {
-                    SendRotationRpc(currentRotation);
-                }
+                _networkRotationY.Value = Mathf.Repeat(currentRotation, 360f);
             }
             else
             {
-                _playerDisguise.SetRotationImmediate(
-                    _networkRotationY.Value
+                if (_provider != null)
+                {
+                    ApplyAppearance(_networkAppearance.Value);
+                    _provider.UpdateRemote();
+                }
+
+                _playerDisguise.SetRotationImmediate(_networkRotationY.Value
                 );
             }
         }
 
         public override void OnNetworkDespawn()
         {
-            _networkRotationY.OnValueChanged -=
-                OnNetworkRotationChanged;
+            _networkRotationY.OnValueChanged -= OnRotationUpdate;
 
-            _networkAppearance.OnValueChanged -=
-                OnNetworkAppearanceChanged;
+            _networkAppearance.OnValueChanged -= OnAppearanceChange;
 
             base.OnNetworkDespawn();
         }
@@ -123,7 +95,7 @@ namespace SpyQuarrelRuntime
             }
             else
             {
-                _provider?.UpdateRemote();
+                //_provider?.UpdateRemote();
             }
 
             if (_playerDisguise == null)
@@ -149,18 +121,16 @@ namespace SpyQuarrelRuntime
             base.OnFixedUpdate();
         }
 
-        private void FindMissingReferences()
+        private void InitComponents()
         {
             if (_playerDisguise == null)
             {
-                _playerDisguise =
-                    GetComponentInChildren<PlayerDisguise>(true);
+                _playerDisguise = GetComponentInChildren<PlayerDisguise>(true);
             }
 
             if (_provider == null)
             {
-                _provider =
-                    GetComponentInChildren<NPCIdenitityProvider>(true);
+                _provider = GetComponentInChildren<NPCIdenitityProvider>(true);
             }
         }
 
@@ -173,6 +143,7 @@ namespace SpyQuarrelRuntime
                 return;
 
             NpcType newType = GetRandomNpcType();
+            
             SetAppearance(newType);
         }
 
@@ -198,97 +169,50 @@ namespace SpyQuarrelRuntime
                 return;
             }
 
-            if (IsServer)
-            {
-                SetAppearanceServer(identity);
-                return;
-            }
-
-            if (IsOwner)
-            {
-                RequestSetAppearanceRpc(identity);
-            }
-        }
-
-        private void SetAppearanceServer(NpcType identity)
-        {
-            if (!IsServer)
+            if (!IsOwner)
                 return;
 
-            bool valueChanged =
-                !_networkAppearance.Value.Equals(identity);
+            bool valueChanged = !_networkAppearance.Value.Equals(identity);
 
             _networkAppearance.Value = identity;
 
-            /*
-             * Apply directly when the value is unchanged because
-             * NetworkVariable callbacks only run when the value changes.
-             */
             if (!valueChanged)
             {
                 ApplyAppearance(identity);
-                RebuildAppearanceRpc(identity);
             }
         }
 
-        [Rpc(
-            SendTo.Server,
-            InvokePermission = RpcInvokePermission.Owner
-        )]
-        private void RequestSetAppearanceRpc(NpcType identity)
-        {
-            SetAppearanceServer(identity);
-        }
-
-        [Rpc(SendTo.NotServer)]
-        private void RebuildAppearanceRpc(NpcType identity)
-        {
-            ApplyAppearance(identity);
-        }
-
-        private void OnNetworkAppearanceChanged(
-            NpcType previousIdentity,
-            NpcType newIdentity)
+        private void OnAppearanceChange(NpcType previousIdentity, NpcType newIdentity)
         {
             ApplyAppearance(newIdentity);
         }
 
         private void ApplyAppearance(NpcType identity)
         {
-            if (_provider == null)
-                return;
+            if (_provider == null) return;
 
             _provider.SetAppearance(identity);
         }
 
         private void UpdateOwnerOrientation()
         {
-            if (Time.unscaledTime < _nextRotationUpdateTime)
-                return;
+            if (Time.unscaledTime < _nextRotationUpdateTime) return;
 
-            float currentRotation =
-                _playerDisguise.RotationYAxis;
+            float currentRotation = _playerDisguise.RotationYAxis;
 
-            float difference = Mathf.Abs(
-                Mathf.DeltaAngle(
-                    _lastSubmittedRotation,
-                    currentRotation
-                )
-            );
 
-            if (difference < _minimumRotationDifference)
-                return;
+            //wrap around 360 angle
+            var delta = Mathf.DeltaAngle(_lastSubmittedRotation, currentRotation);
+            
+            float difference = Mathf.Abs(delta);
+
+            if (difference < _minimumRotationDifference) return;
 
             _lastSubmittedRotation = currentRotation;
 
-            float updateInterval =
-                1f / Mathf.Max(
-                    1f,
-                    _maximumUpdatesPerSecond
-                );
+            float updateInterval = 1f / Mathf.Max(1f, _maximumUpdatesPerSecond);
 
-            _nextRotationUpdateTime =
-                Time.unscaledTime + updateInterval;
+            _nextRotationUpdateTime = Time.unscaledTime + updateInterval;
 
             UpdateRotEuler(currentRotation);
         }
@@ -308,7 +232,7 @@ namespace SpyQuarrelRuntime
 
         private void UpdateRotEuler(float yRot)
         {
-            yRot = Mathf.Repeat(yRot, 360f);
+            yRot = yRot % 360;
 
             if (!IsSpawned)
             {
@@ -316,34 +240,13 @@ namespace SpyQuarrelRuntime
                 return;
             }
 
-            if (IsServer)
-            {
-                _networkRotationY.Value = yRot;
-                return;
-            }
-
-            if (IsOwner)
-            {
-                SendRotationRpc(yRot);
-            }
-        }
-
-        [Rpc(
-            SendTo.Server,
-            InvokePermission = RpcInvokePermission.Owner
-        )]
-        private void SendRotationRpc(float yRot)
-        {
-            if (!IsServer)
+            if (!IsOwner)
                 return;
 
-            _networkRotationY.Value =
-                Mathf.Repeat(yRot, 360f);
+            _networkRotationY.Value = yRot;
         }
 
-        private void OnNetworkRotationChanged(
-            float previousValue,
-            float newValue)
+        private void OnRotationUpdate(float previousValue, float newValue)
         {
             if (IsOwner)
                 return;

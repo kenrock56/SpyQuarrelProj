@@ -147,7 +147,7 @@ MonoBehaviour:
   _requestedCrouch: 0
   _requestedCrouchInAir: 0
   _jumpHeldLastFrame: 0
-  _walkSpeed: 5
+  _walkSpeed: 3.5
   _jumpSpeed: 12
   _jumpWindowTime: 0.2
   _jumpSustainMultiplier: 0.55

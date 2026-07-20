@@ -68,11 +68,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 6851821420944360034}
   m_SourcePrefab: {fileID: 100100000, guid: 00f8db70a549b7b46963a6d7484c0a8b, type: 3}
---- !u!95 &510077640530141099 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 8381099012597990250, guid: 00f8db70a549b7b46963a6d7484c0a8b, type: 3}
-  m_PrefabInstance: {fileID: 8312393448765054145}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8010544695967452138 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2049320596049450795, guid: 00f8db70a549b7b46963a6d7484c0a8b, type: 3}
@@ -93,16 +88,8 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkAnimatorExpanded: 0
   AuthorityMode: 1
-  m_Animator: {fileID: 510077640530141099}
+  m_Animator: {fileID: 0}
   TransitionStateInfoList: []
   AnimatorParameterEntries:
-    ParameterEntries:
-    - name: Blend
-      NameHash: 1784438316
-      Synchronize: 1
-      ParameterType: 1
-    - name: Speed
-      NameHash: -823668238
-      Synchronize: 1
-      ParameterType: 1
+    ParameterEntries: []
   AnimatorParametersExpanded: 0
