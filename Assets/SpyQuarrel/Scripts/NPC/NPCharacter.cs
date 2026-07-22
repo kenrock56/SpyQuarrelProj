@@ -22,7 +22,7 @@ namespace SpyQuarrelRuntime
         private NPCIdenitityProvider _identityProvider;
 
         [Header("Movement")]
-        [SerializeField] private float _arrivalDistance = 0.5f;
+        [SerializeField] private float _stoppingDistance = 0.5f;
         [SerializeField] private float _randomRange = 24f;
         [SerializeField] private float _navMeshSampleRadius = 10f;
 
@@ -37,8 +37,7 @@ namespace SpyQuarrelRuntime
         private float _networkTargetYaw;
         private Vector3 _networkVelocity;
 
-        private float _nextSnapshotTime;
-        private bool _hasReceivedSnapshot;
+        private float _nextStateTime;
 
         private readonly NetworkVariable<NpcType> _networkAppearance = new
         (
@@ -73,11 +72,12 @@ namespace SpyQuarrelRuntime
 
         private void Awake()
         {
-            FindMissingReferences();
+            InitComponents();
         }
 
-        private void FindMissingReferences()
+        private void InitComponents()
         {
+            
             if (_agent == null)
             {
                 _agent = transform.root
@@ -89,13 +89,19 @@ namespace SpyQuarrelRuntime
                 _identityProvider = transform.root
                     .GetComponentInChildren<NPCIdenitityProvider>(true);
             }
+
+            if (_agent != null)
+            { 
+                _agent.stoppingDistance = _stoppingDistance;
+            }
+            
         }
 
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
 
-            FindMissingReferences();
+            InitComponents();
 
             _networkAppearance.OnValueChanged +=
                 OnNetworkAppearanceChanged;
@@ -239,38 +245,31 @@ namespace SpyQuarrelRuntime
 
         private void UpdateServerMovement()
         {
-            bool reachedDestination = !_agent.pathPending && _agent.hasPath && _agent.remainingDistance <=
-                Mathf.Max(_agent.stoppingDistance, _arrivalDistance);
+            bool reachedDestination = !_agent.pathPending && _agent.hasPath && 
+                                      _agent.remainingDistance <= _agent.stoppingDistance;
 
-            bool hasNoPath =
-                !_agent.pathPending &&
-                !_agent.hasPath;
+            bool hasNoPath = !_agent.pathPending && !_agent.hasPath;
 
             if (reachedDestination || hasNoPath)
             {
                 ChooseNewDestination();
             }
 
-            if (Time.time < _nextSnapshotTime)
+            if (Time.time < _nextStateTime)
                 return;
 
-            float timeDelta =
-                1f / Mathf.Max(1f, _snapshotRate);
+            float timeDelta = 1f / _snapshotRate;
 
-            _nextSnapshotTime =
-                Time.time + timeDelta;
+            _nextStateTime = Time.time + timeDelta;
 
-            SendSnapshotRpc(transform.position, transform.eulerAngles.y, _agent.velocity);
+            SendStateRpc(transform.position, transform.eulerAngles.y, _agent.velocity);
         }
 
         private void UpdateRemoteTransform()
         {
-            if (!_hasReceivedSnapshot)
-                return;
+            float positionT = Mathf.Clamp01(_remotePositionLerpSpeed * Time.deltaTime);
 
-            float positionT = 1f - Mathf.Exp(-_remotePositionLerpSpeed * Time.deltaTime);
-
-            float rotationT = 1f - Mathf.Exp(-_remoteRotationLerpSpeed * Time.deltaTime);
+            float rotationT = Mathf.Clamp01(_remoteRotationLerpSpeed * Time.deltaTime);
 
             transform.position = Vector3.Lerp(transform.position, _networkTargetPosition, positionT);
 
@@ -328,8 +327,7 @@ namespace SpyQuarrelRuntime
         }
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-        private void RequestDestinationRpc(
-            Vector3 destination)
+        private void RequestDestinationRpc(Vector3 destination)
         {
             TrySetDestination(destination);
         }
@@ -350,8 +348,7 @@ namespace SpyQuarrelRuntime
             TrySetDestination(randomPosition);
         }
 
-        private bool TrySetDestination(
-            Vector3 requestedPosition)
+        private bool TrySetDestination(Vector3 requestedPosition)
         {
             if (!IsServer || _agent == null || !_agent.enabled)
             {
@@ -374,16 +371,15 @@ namespace SpyQuarrelRuntime
 
             Vector3 velocity = _agent != null && _agent.enabled ? _agent.velocity : Vector3.zero;
 
-            SendSnapshotRpc(transform.position, transform.eulerAngles.y, velocity);
+            SendStateRpc(transform.position, transform.eulerAngles.y, velocity);
         }
 
         [Rpc(SendTo.NotServer)]
-        private void SendSnapshotRpc(Vector3 position, float yaw, Vector3 velocity)
+        private void SendStateRpc(Vector3 position, float yaw, Vector3 velocity)
         {
             _networkTargetPosition = position;
             _networkTargetYaw = yaw;
             _networkVelocity = velocity;
-            _hasReceivedSnapshot = true;
         }
     }
 }

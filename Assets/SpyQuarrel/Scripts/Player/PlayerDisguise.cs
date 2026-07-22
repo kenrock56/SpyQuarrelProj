@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 
 namespace SpyQuarrelRuntime
@@ -42,6 +43,7 @@ namespace SpyQuarrelRuntime
 
             UpdateNetworkRotation();
         }
+
         
 
         private void UpdateLocalRotation()
@@ -72,17 +74,9 @@ namespace SpyQuarrelRuntime
                 return;
             }
 
-            float t = 1f - Mathf.Exp
-            (
-                -_remoteRotationLerpSpeed * Time.deltaTime
-            );
+            float t = 1f - Mathf.Exp(-_remoteRotationLerpSpeed * Time.deltaTime);
 
-            transform.rotation = Quaternion.Slerp
-            (
-                transform.rotation,
-                targetRotation,
-                t
-            );
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, t);
         }
 
         private Quaternion GetInputBasedDirection(Quaternion currentRotation)
