@@ -18,6 +18,8 @@ MonoBehaviour:
   - enabled: 1
     value: {fileID: 7708101046826857874, guid: 69bf594e584586c4db6a25d507a6f063, type: 3}
   - enabled: 1
+    value: {fileID: 1736369523425149643, guid: 0446600a72154754db120826817188b0, type: 3}
+  - enabled: 1
     value: {fileID: 1708909533529912464, guid: b0b6649345a4003448c75a320d1f0a44, type: 3}
   scriptableObjects:
   - enabled: 1
