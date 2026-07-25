@@ -1,18 +1,19 @@
 using System;
+using UnityEditor;
 using UnityEngine;
 
 namespace SpyQuarrelRuntime
 {
     public class SingingInteraction : MonoBehaviour
     {
-        [SerializeField] private Animation _singAnim;
+        private static readonly int _singAnim = Animator.StringToHash("StandingSing");
 
-        private int _singAnimHash;
-
+        [SerializeField]private PatrolPoint _patrolPoint;
+        
+        
         void Awake()
         {
-            if(_singAnim == null)return;
-            _singAnimHash =  Animator.StringToHash(_singAnim.name);
+            
         }
 
 
@@ -21,6 +22,11 @@ namespace SpyQuarrelRuntime
             if (other.TryGetComponent(out NPCharacter character))
             {
                 Debug.Log($"{character.name} has entered the SingingInteraction");
+                
+                var pos = _patrolPoint ? _patrolPoint.transform.position : transform.position;
+                character.StopPatrol();
+                
+                character.transform.position = pos;
             }
             
             Debug.Log($"{other.name} has entered the SingingInteraction");
@@ -32,5 +38,16 @@ namespace SpyQuarrelRuntime
         {
             Debug.Log($"{other.name} is inside the SingingInteraction");
         }
+
+        private void OnDrawGizmos()
+        {
+            if (!_patrolPoint) return;
+            
+            var pos = _patrolPoint.transform.position;
+            var rot = _patrolPoint.transform.rotation;
+            
+            //Handles.ArrowHandleCap();
+        }
+        
     }
 }

@@ -69,7 +69,7 @@ namespace SpyQuarrelRuntime
             {
                 interactHit.collider.TryGetComponent(out hitInteractable);
             }
-
+            
             if (hitInteractable != _currentInteractable)
             {
                 _currentInteractable?.OnInteractExit(this);

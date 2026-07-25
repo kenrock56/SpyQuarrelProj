@@ -52,7 +52,7 @@ namespace SpyQuarrelRuntime
             Debug.Log($"Validated {valiadtes} points");
         }
 
-
+#if UNITY_EDITOR
         private void OnDrawGizmos()
         {
             if (_patrolPoints is { Length: <= 0 })return;
@@ -67,5 +67,6 @@ namespace SpyQuarrelRuntime
             
             Handles.DrawPolyLine(locArray);
         }
+        #endif
     }
 }

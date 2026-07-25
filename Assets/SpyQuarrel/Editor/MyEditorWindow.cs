@@ -1,4 +1,5 @@
-using Codice.CM.Common.Tree;
+
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -24,3 +25,4 @@ namespace SpyQuarrelRuntime
         }
     }
 }
+#endif

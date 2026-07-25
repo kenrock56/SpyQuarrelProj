@@ -5,6 +5,7 @@ namespace SpyQuarrelRuntime
     public class NPCIdenitityProvider : MonoBehaviour
     {
         private static readonly int Speed = Animator.StringToHash("Speed");
+        private static readonly int _moveHash = Animator.StringToHash("Move");
 
         [Header("Identity")]
         [field: SerializeField]
@@ -175,16 +176,22 @@ namespace SpyQuarrelRuntime
 
         private void UpdateAnimator()
         {
-            if (_animator == null)
+            if (_animator == null || _animatorContext == null)
                 return;
 
-            if (_animatorContext == null)
-                return;
+            _animator.SetFloat(Speed, _animatorContext.Speed);
 
-            _animator.SetFloat(
-                Speed,
-                _animatorContext.Speed
-            );
+            SetAnimation(_moveHash);
+        }
+
+        private void SetAnimation(int hash)
+        {
+            var currentState = _animator.GetCurrentAnimatorStateInfo(0);
+            if (currentState.fullPathHash == hash)return;
+            else
+            {
+                _animator.CrossFade(hash, 0.02f, 0);
+            }
         }
 
         [ContextMenu("Build Npc")]

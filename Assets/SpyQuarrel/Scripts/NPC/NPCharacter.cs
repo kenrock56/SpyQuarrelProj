@@ -4,7 +4,10 @@ using UnityEngine.AI;
 
 namespace SpyQuarrelRuntime
 {
-    public class NPCharacter : NetworkBehaviour, IAnimatorContext, IInteractable
+    public class NPCharacter :
+        NetworkBehaviour,
+        IAnimatorContext,
+        IInteractable
     {
         public string InteractName => "Jeff";
 
@@ -20,9 +23,13 @@ namespace SpyQuarrelRuntime
         [SerializeField, Min(1)] private int _randomDestinationAttempts = 5;
 
         private int _currentPatrolIndex;
+        private bool _hasDestinationOverride;
 
         [Header("References")]
         [SerializeField] private NavMeshAgent _agent;
+
+        public NPCIdenitityProvider IdentityProvider =>
+            _identityProvider;
 
         [SerializeField]
         private NPCIdenitityProvider _identityProvider;
@@ -35,16 +42,7 @@ namespace SpyQuarrelRuntime
         [Header("Network Snapshots")]
         [SerializeField] private float _snapshotRate = 15f;
 
-        [SerializeField]
-        private float _remotePositionLerpSpeed = 15f;
-
-        [SerializeField]
-        private float _remoteRotationLerpSpeed = 15f;
-
-        private Vector3 _networkTargetPosition;
-        private float _networkTargetYaw;
         private Vector3 _networkVelocity;
-
         private float _nextStateTime;
 
         private readonly NetworkVariable<NpcType> _networkAppearance = new
@@ -58,7 +56,9 @@ namespace SpyQuarrelRuntime
         {
             get
             {
-                if (IsServer && _agent != null && _agent.enabled)
+                if (IsServer &&
+                    _agent != null &&
+                    _agent.enabled)
                 {
                     return _agent.velocity;
                 }
@@ -80,7 +80,8 @@ namespace SpyQuarrelRuntime
             }
         }
 
-        public Vector3 ForwardDirection => transform.forward;
+        public Vector3 ForwardDirection =>
+            transform.forward;
 
         private void Awake()
         {
@@ -103,7 +104,8 @@ namespace SpyQuarrelRuntime
 
             if (_agent != null)
             {
-                _agent.stoppingDistance = _stoppingDistance;
+                _agent.stoppingDistance =
+                    _stoppingDistance;
             }
         }
 
@@ -126,18 +128,11 @@ namespace SpyQuarrelRuntime
                 return;
             }
 
+            _networkVelocity = Vector3.zero;
+
             if (IsServer)
             {
                 _agent.enabled = true;
-
-                _networkTargetPosition =
-                    transform.position;
-
-                _networkTargetYaw =
-                    transform.eulerAngles.y;
-
-                _networkVelocity =
-                    Vector3.zero;
 
                 if (_identityProvider != null)
                 {
@@ -145,27 +140,24 @@ namespace SpyQuarrelRuntime
                         _identityProvider.NpcIdentityType;
                 }
 
-                SetInitialPatrolIndex();
-                ChooseNewDestination();
+                if (_isUsingPatrol)
+                {
+                    SetInitialPatrolIndex();
+                    ChooseNewDestination();
+                }
+
                 SendSnapshotImmediately();
             }
             else
             {
                 _agent.enabled = false;
-
-                _networkTargetPosition =
-                    transform.position;
-
-                _networkTargetYaw =
-                    transform.eulerAngles.y;
-
-                _networkVelocity =
-                    Vector3.zero;
             }
 
             if (_identityProvider != null)
             {
-                ApplyAppearance(_networkAppearance.Value);
+                ApplyAppearance(
+                    _networkAppearance.Value
+                );
             }
         }
 
@@ -179,8 +171,11 @@ namespace SpyQuarrelRuntime
 
         private void Update()
         {
-            if (!IsSpawned || _agent == null)
+            if (!IsSpawned ||
+                _agent == null)
+            {
                 return;
+            }
 
             if (IsServer)
             {
@@ -189,7 +184,6 @@ namespace SpyQuarrelRuntime
             }
             else
             {
-                UpdateRemoteTransform();
                 _identityProvider?.UpdateRemote();
             }
         }
@@ -215,7 +209,8 @@ namespace SpyQuarrelRuntime
             }
         }
 
-        private void SetAppearanceServer(NpcType identity)
+        private void SetAppearanceServer(
+            NpcType identity)
         {
             if (!IsServer)
                 return;
@@ -236,13 +231,15 @@ namespace SpyQuarrelRuntime
             SendTo.Server,
             InvokePermission = RpcInvokePermission.Everyone
         )]
-        private void RequestSetAppearanceRpc(NpcType identity)
+        private void RequestSetAppearanceRpc(
+            NpcType identity)
         {
             SetAppearanceServer(identity);
         }
 
         [Rpc(SendTo.NotServer)]
-        private void RebuildAppearanceRpc(NpcType identity)
+        private void RebuildAppearanceRpc(
+            NpcType identity)
         {
             ApplyAppearance(identity);
         }
@@ -254,7 +251,8 @@ namespace SpyQuarrelRuntime
             ApplyAppearance(newIdentity);
         }
 
-        private void ApplyAppearance(NpcType identity)
+        private void ApplyAppearance(
+            NpcType identity)
         {
             if (_identityProvider == null)
                 return;
@@ -274,7 +272,16 @@ namespace SpyQuarrelRuntime
                 !_agent.pathPending &&
                 !_agent.hasPath;
 
-            if (reachedDestination || hasNoPath)
+            if (_hasDestinationOverride)
+            {
+                if (reachedDestination || hasNoPath)
+                {
+                    _hasDestinationOverride = false;
+                    _agent.ResetPath();
+                }
+            }
+            else if (_isUsingPatrol &&
+                     (reachedDestination || hasNoPath))
             {
                 ChooseNewDestination();
             }
@@ -282,44 +289,59 @@ namespace SpyQuarrelRuntime
             if (Time.time < _nextStateTime)
                 return;
 
-            float timeDelta = 1f / _snapshotRate;
+            float timeDelta =
+                1f / Mathf.Max(1f, _snapshotRate);
 
-            _nextStateTime = Time.time + timeDelta;
+            _nextStateTime =
+                Time.time + timeDelta;
 
-            SendStateRpc(
-                transform.position,
-                transform.eulerAngles.y,
-                _agent.velocity
-            );
+            SendVelocityRpc(_agent.velocity);
         }
 
-        private void UpdateRemoteTransform()
+        public void StartPatrol()
         {
-            float positionT = Mathf.Clamp01(
-                _remotePositionLerpSpeed * Time.deltaTime
-            );
+            if (!IsSpawned)
+                return;
 
-            float rotationT = Mathf.Clamp01(
-                _remoteRotationLerpSpeed * Time.deltaTime
-            );
+            if (IsServer)
+            {
+                StartPatrolServer();
+            }
+            else
+            {
+                StartPatrolRpc();
+            }
+        }
 
-            transform.position = Vector3.Lerp(
-                transform.position,
-                _networkTargetPosition,
-                positionT
-            );
+        public void StopPatrol()
+        {
+            if (!IsSpawned)
+                return;
 
-            Quaternion targetRotation = Quaternion.Euler(
-                0f,
-                _networkTargetYaw,
-                0f
-            );
+            if (IsServer)
+            {
+                StopPatrolServer();
+            }
+            else
+            {
+                StopPatrolRpc();
+            }
+        }
 
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                targetRotation,
-                rotationT
-            );
+        public void RequestDestination(
+            Vector3 destination)
+        {
+            if (!IsSpawned)
+                return;
+
+            if (IsServer)
+            {
+                SetDestinationOverride(destination);
+            }
+            else
+            {
+                RequestDestinationRpc(destination);
+            }
         }
 
         public void RequestRandomDestination()
@@ -329,7 +351,7 @@ namespace SpyQuarrelRuntime
 
             if (IsServer)
             {
-                TrySetRandomDestination();
+                SetRandomDestinationOverride();
             }
             else
             {
@@ -337,22 +359,8 @@ namespace SpyQuarrelRuntime
             }
         }
 
-        public void RequestDestination(Vector3 destination)
-        {
-            if (!IsSpawned)
-                return;
-
-            if (IsServer)
-            {
-                TrySetDestination(destination);
-            }
-            else
-            {
-                RequestDestinationRpc(destination);
-            }
-        }
-
-        public void Interact(Interactor interactor)
+        public void Interact(
+            Interactor interactor)
         {
             if (interactor == null)
                 return;
@@ -368,21 +376,40 @@ namespace SpyQuarrelRuntime
             SendTo.Server,
             InvokePermission = RpcInvokePermission.Everyone
         )]
-        private void RequestRandomDestinationRpc()
+        private void StartPatrolRpc()
         {
-            TrySetRandomDestination();
+            StartPatrolServer();
         }
 
         [Rpc(
             SendTo.Server,
             InvokePermission = RpcInvokePermission.Everyone
         )]
-        private void RequestDestinationRpc(Vector3 destination)
+        private void StopPatrolRpc()
         {
-            TrySetDestination(destination);
+            StopPatrolServer();
         }
 
-        private void ChooseNewDestination()
+        [Rpc(
+            SendTo.Server,
+            InvokePermission = RpcInvokePermission.Everyone
+        )]
+        private void RequestDestinationRpc(
+            Vector3 destination)
+        {
+            SetDestinationOverride(destination);
+        }
+
+        [Rpc(
+            SendTo.Server,
+            InvokePermission = RpcInvokePermission.Everyone
+        )]
+        private void RequestRandomDestinationRpc()
+        {
+            SetRandomDestinationOverride();
+        }
+
+        private void StartPatrolServer()
         {
             if (!IsServer ||
                 _agent == null ||
@@ -391,13 +418,100 @@ namespace SpyQuarrelRuntime
                 return;
             }
 
-            if (_isUsingPatrol &&
-                TrySetNextPatrolDestination())
+            PatrolPoint[] patrolPoints =
+                _patrolRoute != null
+                    ? _patrolRoute.PatrolPoints
+                    : null;
+
+            if (patrolPoints == null ||
+                patrolPoints.Length == 0)
+            {
+                Debug.LogWarning(
+                    "[NPCharacter] Cannot start patrol because no patrol route or patrol points are assigned.",
+                    this
+                );
+
+                return;
+            }
+
+            _agent.ResetPath();
+
+            _hasDestinationOverride = false;
+            _isUsingPatrol = true;
+
+            SetInitialPatrolIndex();
+            ChooseNewDestination();
+        }
+
+        private void StopPatrolServer()
+        {
+            if (!IsServer ||
+                _agent == null ||
+                !_agent.enabled)
             {
                 return;
             }
 
-            TrySetRandomDestination();
+            _isUsingPatrol = false;
+            _hasDestinationOverride = false;
+
+            _agent.ResetPath();
+        }
+
+        private void SetDestinationOverride(
+            Vector3 destination)
+        {
+            if (!IsServer ||
+                _agent == null ||
+                !_agent.enabled)
+            {
+                return;
+            }
+
+            StopPatrolServer();
+
+            if (TrySetDestination(destination))
+            {
+                _hasDestinationOverride = true;
+            }
+        }
+
+        private void SetRandomDestinationOverride()
+        {
+            if (!IsServer ||
+                _agent == null ||
+                !_agent.enabled)
+            {
+                return;
+            }
+
+            StopPatrolServer();
+
+            if (TrySetRandomDestination())
+            {
+                _hasDestinationOverride = true;
+            }
+        }
+
+        private void ChooseNewDestination()
+        {
+            if (!IsServer ||
+                !_isUsingPatrol ||
+                _agent == null ||
+                !_agent.enabled)
+            {
+                return;
+            }
+
+            if (TrySetNextPatrolDestination())
+                return;
+
+            StopPatrolServer();
+
+            Debug.LogWarning(
+                "[NPCharacter] Patrol stopped because no valid patrol destination could be found.",
+                this
+            );
         }
 
         private bool TrySetNextPatrolDestination()
@@ -417,7 +531,9 @@ namespace SpyQuarrelRuntime
                 Mathf.Abs(_currentPatrolIndex) %
                 patrolPoints.Length;
 
-            for (int i = 0; i < patrolPoints.Length; i++)
+            for (int i = 0;
+                 i < patrolPoints.Length;
+                 i++)
             {
                 int pointIndex =
                     (_currentPatrolIndex + i) %
@@ -455,7 +571,10 @@ namespace SpyQuarrelRuntime
             }
 
             int attempts =
-                Mathf.Max(1, _randomDestinationAttempts);
+                Mathf.Max(
+                    1,
+                    _randomDestinationAttempts
+                );
 
             for (int i = 0; i < attempts; i++)
             {
@@ -481,7 +600,7 @@ namespace SpyQuarrelRuntime
             }
 
             Debug.LogWarning(
-                $"[NPCharacter] Could not find a valid destination after {attempts} attempts.",
+                $"[NPCharacter] Could not find a valid random destination after {attempts} attempts.",
                 this
             );
 
@@ -507,9 +626,12 @@ namespace SpyQuarrelRuntime
                 return false;
             }
 
-            NavMeshPath path = new NavMeshPath();
+            NavMeshPath path =
+                new NavMeshPath();
 
-            if (!_agent.CalculatePath(hit.position, path))
+            if (!_agent.CalculatePath(
+                    hit.position,
+                    path))
             {
                 return false;
             }
@@ -534,11 +656,8 @@ namespace SpyQuarrelRuntime
         {
             _currentPatrolIndex = 0;
 
-            if (!_isUsingPatrol ||
-                _patrolRoute == null)
-            {
+            if (_patrolRoute == null)
                 return;
-            }
 
             PatrolPoint[] patrolPoints =
                 _patrolRoute.PatrolPoints;
@@ -552,7 +671,9 @@ namespace SpyQuarrelRuntime
             float closestDistance =
                 float.PositiveInfinity;
 
-            for (int i = 0; i < patrolPoints.Length; i++)
+            for (int i = 0;
+                 i < patrolPoints.Length;
+                 i++)
             {
                 PatrolPoint patrolPoint =
                     patrolPoints[i];
@@ -583,21 +704,13 @@ namespace SpyQuarrelRuntime
                     ? _agent.velocity
                     : Vector3.zero;
 
-            SendStateRpc(
-                transform.position,
-                transform.eulerAngles.y,
-                velocity
-            );
+            SendVelocityRpc(velocity);
         }
 
         [Rpc(SendTo.NotServer)]
-        private void SendStateRpc(
-            Vector3 position,
-            float yaw,
+        private void SendVelocityRpc(
             Vector3 velocity)
         {
-            _networkTargetPosition = position;
-            _networkTargetYaw = yaw;
             _networkVelocity = velocity;
         }
     }
