@@ -10,6 +10,7 @@ namespace SpyQuarrelRuntime
     {
         [SerializeField] private PlayerInputController _inputController;
         [SerializeField] private PlayerCamera _camera;
+        public PlayerCharacter Character => _character;
         [SerializeField] private PlayerCharacter _character;
         [SerializeField] private Transform _playerRoot;
         [SerializeField] protected bool _networkSuccess = false;
@@ -31,7 +32,7 @@ namespace SpyQuarrelRuntime
 
         private bool _offlineMotorRegistered;
 
-        private void Awake()
+        protected virtual void Awake()
         {
             if (_bufferSize <= 1)
                 _bufferSize = 1024;
@@ -495,7 +496,7 @@ namespace SpyQuarrelRuntime
             };
         }
 
-        private void EnableLocalItems()
+        protected virtual void EnableLocalItems()
         {
             if (_inputController != null)
                 _inputController.enabled = true;

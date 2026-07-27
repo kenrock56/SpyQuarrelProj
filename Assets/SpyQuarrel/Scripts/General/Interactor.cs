@@ -14,6 +14,12 @@ namespace SpyQuarrelRuntime
 
         [SerializeField]private PlayerInputController _inputController;
 
+        public Vector3 InteractStartPos => _startPos;
+        public Vector3 InteractEndPos => _endPos;
+        
+        private Vector3 _startPos;
+        private Vector3 _endPos;
+        
         private bool interactHeld => _inputController && _inputController.InteractHeld;
 
         private Transform _cameraTransform;
@@ -57,16 +63,23 @@ namespace SpyQuarrelRuntime
 
         private void Update()
         {
+            
+            
             if (!_cameraTransform || !_inputController)
             {
+                _startPos = Vector3.zero;
+                _endPos = Vector3.zero;
                 ClearInteractable();
                 return;
             }
 
+            _startPos = _cameraTransform.position;
+            
             IInteractable hitInteractable = null;
 
             if (Physics.Raycast(_cameraTransform.position, _cameraTransform.forward, out RaycastHit interactHit, _interactRange))
             {
+                _endPos = interactHit.point;
                 interactHit.collider.TryGetComponent(out hitInteractable);
             }
             

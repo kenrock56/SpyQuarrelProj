@@ -143,7 +143,7 @@ namespace SpyQuarrelRuntime
             if (GameNetworkManager.Instance.LocalPlayer == null)
                 return;
 
-            _localPlayerTransform = GameNetworkManager.Instance.LocalPlayer.transform;
+            _localPlayerTransform = GameNetworkManager.Instance.LocalPlayer.Character.transform;
         }
 
         private void CacheCameraTransform()

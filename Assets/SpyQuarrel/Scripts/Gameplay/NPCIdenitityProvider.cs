@@ -64,6 +64,7 @@ namespace SpyQuarrelRuntime
             if (!_hasAppearance)
             {
                 BuildNpc();
+                SetMoveAnim();
             }
         }
 
@@ -76,10 +77,7 @@ namespace SpyQuarrelRuntime
 
             if (_animatorContext == null)
             {
-                Debug.LogError(
-                    "[NPCIdentityProvider] No animator context found.",
-                    this
-                );
+                Debug.LogError("[NPCIdentityProvider] No animator context found.", this);
             }
         }
 
@@ -181,7 +179,7 @@ namespace SpyQuarrelRuntime
 
             _animator.SetFloat(Speed, _animatorContext.Speed);
 
-            SetAnimation(_moveHash);
+            //SetAnimation(_moveHash);
         }
 
         private void SetAnimation(int hash)
@@ -192,6 +190,11 @@ namespace SpyQuarrelRuntime
             {
                 _animator.CrossFade(hash, 0.02f, 0);
             }
+        }
+
+        public void SetMoveAnim()
+        {
+            SetAnimation(_moveHash);
         }
 
         [ContextMenu("Build Npc")]
