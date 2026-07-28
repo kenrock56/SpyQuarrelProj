@@ -365,7 +365,7 @@ namespace SpyQuarrelRuntime
             if (interactor.transform.root.TryGetComponent(
                     out SpyCharacter spyCharacter))
             {
-                // Add interaction behaviour here.
+                SetAnimation(NpcAnimState.Move);
             }
         }
 
