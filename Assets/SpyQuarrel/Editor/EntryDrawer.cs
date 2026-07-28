@@ -1,5 +1,4 @@
 
-#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 [CustomPropertyDrawer(typeof(GenericEntryBase<,>), true)]
@@ -33,5 +32,4 @@ public class GenericEntryDrawer : PropertyDrawer
         return EditorGUIUtility.singleLineHeight;
     }
 }
-#endif
 

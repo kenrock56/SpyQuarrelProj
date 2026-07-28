@@ -1,6 +1,8 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 namespace SpyQuarrelRuntime
 {
@@ -209,8 +211,7 @@ namespace SpyQuarrelRuntime
             }
         }
 
-        private void SetAppearanceServer(
-            NpcType identity)
+        private void SetAppearanceServer(NpcType identity)
         {
             if (!IsServer)
                 return;
@@ -226,11 +227,10 @@ namespace SpyQuarrelRuntime
             ApplyAppearance(identity);
             RebuildAppearanceRpc(identity);
         }
+        
+        
 
-        [Rpc(
-            SendTo.Server,
-            InvokePermission = RpcInvokePermission.Everyone
-        )]
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         private void RequestSetAppearanceRpc(
             NpcType identity)
         {
@@ -238,15 +238,12 @@ namespace SpyQuarrelRuntime
         }
 
         [Rpc(SendTo.NotServer)]
-        private void RebuildAppearanceRpc(
-            NpcType identity)
+        private void RebuildAppearanceRpc(NpcType identity)
         {
             ApplyAppearance(identity);
         }
 
-        private void OnNetworkAppearanceChanged(
-            NpcType previousIdentity,
-            NpcType newIdentity)
+        private void OnNetworkAppearanceChanged(NpcType previousIdentity, NpcType newIdentity)
         {
             ApplyAppearance(newIdentity);
         }
@@ -652,6 +649,11 @@ namespace SpyQuarrelRuntime
             return true;
         }
 
+        public void SetAnimation(NpcAnimState animState)
+        {
+            IdentityProvider.SetAnimation(animState);
+        }
+
         private void SetInitialPatrolIndex()
         {
             _currentPatrolIndex = 0;
@@ -705,6 +707,26 @@ namespace SpyQuarrelRuntime
                     : Vector3.zero;
 
             SendVelocityRpc(velocity);
+        }
+
+        private void OnCollisionEnter(Collision other)
+        {
+            Debug.Log($"Collision Enter: {other.collider.gameObject.name}");
+            if (other.collider.transform.root.gameObject.TryGetComponent(out Player player) ||
+                other.collider.TryGetComponent(out PlayerCharacter playerCharacter))
+            {
+                SetAnimation(NpcAnimState.Move);
+            }
+        }
+
+        private void OnCollisionStay(Collision other)
+        {
+            Debug.Log($"Collision Stay: {other.collider.gameObject.name}");
+        }
+
+        private void OnTriggerStay(Collider other)
+        {
+            Debug.Log($"Trigger Stay: {other.gameObject.name}");
         }
 
         [Rpc(SendTo.NotServer)]

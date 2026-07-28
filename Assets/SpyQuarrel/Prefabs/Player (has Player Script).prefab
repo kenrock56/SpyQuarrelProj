@@ -198,6 +198,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _mouseSensitivity: {x: 0.5, y: 0.5}
+  _minPitch: -85
+  _maxPitch: 85
 --- !u!114 &4780841627020213995
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -226,6 +228,7 @@ GameObject:
   - component: {fileID: 1504003973700539345}
   - component: {fileID: 1150482212417108463}
   - component: {fileID: 205327034685397770}
+  - component: {fileID: 6362094028038464252}
   m_Layer: 0
   m_Name: Player (has Player Script)
   m_TagString: Untagged
@@ -314,11 +317,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c1679f0fdf2f5649937b8be14e3ccf5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _inputRef: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   _moveInput: {x: 0, y: 0}
   _lookInput: {x: 0, y: 0}
   _tryToJump: 0
   _tryToCrouch: 0
+--- !u!54 &6362094028038464252
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4471688079244152639}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 2
 --- !u!1 &4939560541301924350
 GameObject:
   m_ObjectHideFlags: 0

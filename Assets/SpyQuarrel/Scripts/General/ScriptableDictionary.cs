@@ -14,7 +14,7 @@ public abstract class ScriptableDictionary<TKey, TValue> : ScriptableObject wher
         BuildDictionary();
     }
 
-    public void BuildDictionary()
+    public virtual void BuildDictionary()
     {
         _dictionary = new Dictionary<TKey, TValue>();
 
@@ -36,7 +36,7 @@ public abstract class ScriptableDictionary<TKey, TValue> : ScriptableObject wher
         }
     }
 
-    public bool TryGetValue(TKey key, out TValue value)
+    public virtual bool TryGetValue(TKey key, out TValue value)
     {
         if (_dictionary == null)
             BuildDictionary();
@@ -44,7 +44,7 @@ public abstract class ScriptableDictionary<TKey, TValue> : ScriptableObject wher
         return _dictionary.TryGetValue(key, out value);
     }
 
-    public TValue GetValue(TKey key)
+    public virtual TValue GetValue(TKey key)
     {
         if (_dictionary == null)
             BuildDictionary();
@@ -55,7 +55,7 @@ public abstract class ScriptableDictionary<TKey, TValue> : ScriptableObject wher
         throw new KeyNotFoundException($"Key '{key}' was not found in {name}.");
     }
 
-    public bool ContainsKey(TKey key)
+    public virtual bool ContainsKey(TKey key)
     {
         if (_dictionary == null)
             BuildDictionary();
@@ -63,7 +63,7 @@ public abstract class ScriptableDictionary<TKey, TValue> : ScriptableObject wher
         return _dictionary.ContainsKey(key);
     }
 
-    public TValue this[TKey key] => GetValue(key);
+    public virtual TValue this[TKey key] => GetValue(key);
 
     public IReadOnlyDictionary<TKey, TValue> Dictionary
     {

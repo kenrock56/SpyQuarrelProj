@@ -27,6 +27,9 @@ namespace SpyQuarrelRuntime
                 character.StopPatrol();
                 
                 character.transform.position = pos;
+                character.transform.forward = _patrolPoint.transform.forward;
+                
+                character.SetAnimation(NpcAnimState.Sing);
             }
             
             Debug.Log($"{other.name} has entered the SingingInteraction");
@@ -36,7 +39,7 @@ namespace SpyQuarrelRuntime
 
         private void OnTriggerStay(Collider other)
         {
-            Debug.Log($"{other.name} is inside the SingingInteraction");
+            //Debug.Log($"{other.name} is inside the SingingInteraction");
         }
 
         private void OnDrawGizmos()

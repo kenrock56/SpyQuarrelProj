@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SpyQuarrelRuntime
@@ -6,7 +7,11 @@ namespace SpyQuarrelRuntime
     {
         private static readonly int Speed = Animator.StringToHash("Speed");
         private static readonly int _moveHash = Animator.StringToHash("Move");
+        private static readonly int _singHash = Animator.StringToHash("StandingSing");
 
+        
+        private Dictionary<NpcAnimState, int> _animStateDictionary = new Dictionary<NpcAnimState, int>();
+        
         [Header("Identity")]
         [field: SerializeField]
         public NpcType NpcIdentityType { get; private set; }
@@ -54,6 +59,7 @@ namespace SpyQuarrelRuntime
 
         private void Awake()
         {
+            BuildDictionary();
             InitialiseIdentity();
             InitialiseAnimator();
             BuildNpc();
@@ -81,6 +87,13 @@ namespace SpyQuarrelRuntime
             }
         }
 
+        private void BuildDictionary()
+        {
+            _animStateDictionary = new Dictionary<NpcAnimState, int>();
+
+            _animStateDictionary.TryAdd(NpcAnimState.Move, _moveHash);
+            _animStateDictionary.TryAdd(NpcAnimState.Sing, _singHash);
+        }
         private void InitialiseAnimator()
         {
             if (_animator == null)
@@ -182,7 +195,17 @@ namespace SpyQuarrelRuntime
             //SetAnimation(_moveHash);
         }
 
-        private void SetAnimation(int hash)
+        public void SetAnimation(NpcAnimState state)
+        {
+            if(_animStateDictionary == null)return;
+            if (_animStateDictionary.TryGetValue(state, out var animHash))
+            {
+                SetAnimation(animHash);
+            }
+            
+        }
+        
+        public void SetAnimation(int hash)
         {
             var currentState = _animator.GetCurrentAnimatorStateInfo(0);
             if (currentState.fullPathHash == hash)return;
@@ -196,6 +219,8 @@ namespace SpyQuarrelRuntime
         {
             SetAnimation(_moveHash);
         }
+        
+        
 
         [ContextMenu("Build Npc")]
         public void BuildNpc()
