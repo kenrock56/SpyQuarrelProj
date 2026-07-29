@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Unity.Netcode;
 using UnityEditor;
 using UnityEngine;
 
@@ -68,5 +69,6 @@ namespace SpyQuarrelRuntime
             Handles.DrawPolyLine(locArray);
         }
         #endif
+       
     }
 }

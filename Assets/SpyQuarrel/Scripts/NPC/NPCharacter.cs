@@ -6,15 +6,11 @@ using Random = UnityEngine.Random;
 
 namespace SpyQuarrelRuntime
 {
-    public class NPCharacter :
-        NetworkBehaviour,
-        IAnimatorContext,
-        IInteractable
+    public class NPCharacter : NetworkBehaviour, IAnimatorContext, IInteractable
     {
         public string InteractName => "Jeff";
 
-        public string InteractDescription =>
-            "press blah to blah";
+        public string InteractDescription => "press blah to blah";
 
         public bool IsInteractable => true;
 
@@ -30,8 +26,7 @@ namespace SpyQuarrelRuntime
         [Header("References")]
         [SerializeField] private NavMeshAgent _agent;
 
-        public NPCIdenitityProvider IdentityProvider =>
-            _identityProvider;
+        public NPCIdenitityProvider IdentityProvider => _identityProvider;
 
         [SerializeField]
         private NPCIdenitityProvider _identityProvider;
@@ -47,20 +42,13 @@ namespace SpyQuarrelRuntime
         private Vector3 _networkVelocity;
         private float _nextStateTime;
 
-        private readonly NetworkVariable<NpcType> _networkAppearance = new
-        (
-            default,
-            NetworkVariableReadPermission.Everyone,
-            NetworkVariableWritePermission.Server
-        );
+        private readonly NetworkVariable<NpcType> _networkAppearance = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         public Vector3 Velocity
         {
             get
             {
-                if (IsServer &&
-                    _agent != null &&
-                    _agent.enabled)
+                if (IsServer && _agent != null && _agent.enabled)
                 {
                     return _agent.velocity;
                 }
@@ -75,40 +63,61 @@ namespace SpyQuarrelRuntime
             {
                 Vector3 velocity = Velocity;
 
-                return new Vector2(
-                    velocity.x,
-                    velocity.z
-                ).magnitude;
+                return new Vector2(velocity.x, velocity.z).magnitude;
             }
         }
 
-        public Vector3 ForwardDirection =>
-            transform.forward;
+        public Vector3 ForwardDirection => transform.forward;
 
         private void Awake()
         {
             InitComponents();
+            SetupComponents();
         }
 
         private void InitComponents()
         {
             if (_agent == null)
             {
-                _agent = transform.root
-                    .GetComponentInChildren<NavMeshAgent>(true);
+                _agent = transform.root.GetComponentInChildren<NavMeshAgent>(true);
             }
 
             if (_identityProvider == null)
             {
-                _identityProvider = transform.root
-                    .GetComponentInChildren<NPCIdenitityProvider>(true);
+                _identityProvider = transform.root.GetComponentInChildren<NPCIdenitityProvider>(true);
             }
 
             if (_agent != null)
             {
-                _agent.stoppingDistance =
-                    _stoppingDistance;
+                _agent.stoppingDistance = _stoppingDistance;
             }
+        }
+
+        private void SetupComponents()
+        {
+            if (_agent == null)
+                return;
+
+            _agent.updateRotation = false;
+        }
+
+        private void TurnAgent(Vector3 destination)
+        {
+            Vector3 difference = destination - _agent.transform.position;
+
+            if (difference.magnitude < 0.1f)
+                return;
+
+            Vector3 direction = difference.normalized;
+
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+
+            Quaternion rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.unscaledDeltaTime * 15f);
+
+            rotation.x = 0f;
+            rotation.z = 0f;
+
+            transform.rotation = rotation;
         }
 
         public override void OnNetworkSpawn()
@@ -122,11 +131,7 @@ namespace SpyQuarrelRuntime
 
             if (_agent == null)
             {
-                Debug.LogError(
-                    "[NPCharacter] NavMeshAgent reference is missing.",
-                    this
-                );
-
+                Debug.LogError("[NPCharacter] NavMeshAgent reference is missing.", this);
                 return;
             }
 
@@ -138,8 +143,7 @@ namespace SpyQuarrelRuntime
 
                 if (_identityProvider != null)
                 {
-                    _networkAppearance.Value =
-                        _identityProvider.NpcIdentityType;
+                    _networkAppearance.Value = _identityProvider.NpcIdentityType;
                 }
 
                 if (_isUsingPatrol)
@@ -157,27 +161,25 @@ namespace SpyQuarrelRuntime
 
             if (_identityProvider != null)
             {
-                ApplyAppearance(
-                    _networkAppearance.Value
-                );
+                ApplyAppearance(_networkAppearance.Value);
             }
         }
 
         public override void OnNetworkDespawn()
         {
-            _networkAppearance.OnValueChanged -=
-                OnNetworkAppearanceChanged;
+            _networkAppearance.OnValueChanged -= OnNetworkAppearanceChanged;
 
             base.OnNetworkDespawn();
         }
 
         private void Update()
         {
-            if (!IsSpawned ||
-                _agent == null)
+            if (!IsSpawned || _agent == null)
             {
                 return;
             }
+
+            TurnAgent(_agent.destination);
 
             if (IsServer)
             {
@@ -188,6 +190,66 @@ namespace SpyQuarrelRuntime
             {
                 _identityProvider?.UpdateRemote();
             }
+        }
+
+        public void SetRouteRpc(PatrolRouteReference routeReference)
+        {
+            if (!IsSpawned) return;
+
+            if (IsServer)
+            {
+                ApplyRouteReference(routeReference);
+            }
+            else
+            {
+                RequestSetRouteRpc(routeReference);
+            }
+        }
+
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        private void RequestSetRouteRpc(PatrolRouteReference routeReference)
+        {
+            ApplyRouteReference(routeReference);
+        }
+
+        private void ApplyRouteReference(PatrolRouteReference routeReference)
+        {
+            if (!IsServer) return;
+
+            if (PatrolManager.Instance == null)
+            {
+                Debug.LogWarning("[NPCharacter] PatrolManager instance is missing.", this);
+                return;
+            }
+
+            if (!PatrolManager.Instance.TryGetRouteFromIndex(routeReference.IndexInList, out PatrolRoute route))
+            {
+                Debug.LogWarning($"[NPCharacter] Could not find patrol route at index {routeReference.IndexInList}.", this);
+                return;
+            }
+
+            SetRoute(route);
+        }
+
+        private void SetRoute(PatrolRoute route)
+        {
+            if (!IsServer)
+            {
+                Debug.LogWarning("[NPCharacter] Patrol routes must be assigned by the server.", this);
+                return;
+            }
+
+            StopPatrolServer();
+
+            _patrolRoute = route;
+            _currentPatrolIndex = 0;
+
+            if (_patrolRoute == null || _patrolRoute.PatrolPoints == null || _patrolRoute.PatrolPoints.Length == 0)
+            {
+                return;
+            }
+
+            StartPatrolServer();
         }
 
         public void SetAppearance(NpcType identity)
@@ -211,7 +273,8 @@ namespace SpyQuarrelRuntime
             }
         }
 
-        private void SetAppearanceServer(NpcType identity)
+        private void SetAppearanceServer(
+            NpcType identity)
         {
             if (!IsServer)
                 return;
@@ -219,7 +282,8 @@ namespace SpyQuarrelRuntime
             bool valueChanged =
                 !_networkAppearance.Value.Equals(identity);
 
-            _networkAppearance.Value = identity;
+            _networkAppearance.Value =
+                identity;
 
             if (valueChanged)
                 return;
@@ -227,10 +291,11 @@ namespace SpyQuarrelRuntime
             ApplyAppearance(identity);
             RebuildAppearanceRpc(identity);
         }
-        
-        
 
-        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        [Rpc(
+            SendTo.Server,
+            InvokePermission = RpcInvokePermission.Everyone
+        )]
         private void RequestSetAppearanceRpc(
             NpcType identity)
         {
@@ -238,12 +303,15 @@ namespace SpyQuarrelRuntime
         }
 
         [Rpc(SendTo.NotServer)]
-        private void RebuildAppearanceRpc(NpcType identity)
+        private void RebuildAppearanceRpc(
+            NpcType identity)
         {
             ApplyAppearance(identity);
         }
 
-        private void OnNetworkAppearanceChanged(NpcType previousIdentity, NpcType newIdentity)
+        private void OnNetworkAppearanceChanged(
+            NpcType previousIdentity,
+            NpcType newIdentity)
         {
             ApplyAppearance(newIdentity);
         }
@@ -300,6 +368,8 @@ namespace SpyQuarrelRuntime
             if (!IsSpawned)
                 return;
 
+            SetUpdateRotation(false);
+
             if (IsServer)
             {
                 StartPatrolServer();
@@ -315,6 +385,8 @@ namespace SpyQuarrelRuntime
             if (!IsSpawned)
                 return;
 
+            SetUpdateRotation(true);
+
             if (IsServer)
             {
                 StopPatrolServer();
@@ -322,6 +394,16 @@ namespace SpyQuarrelRuntime
             else
             {
                 StopPatrolRpc();
+            }
+        }
+
+        private void SetUpdateRotation(
+            bool shouldUpdate)
+        {
+            if (_agent != null)
+            {
+                _agent.updateRotation =
+                    shouldUpdate;
             }
         }
 
@@ -356,8 +438,7 @@ namespace SpyQuarrelRuntime
             }
         }
 
-        public void Interact(
-            Interactor interactor)
+        public void Interact(Interactor interactor)
         {
             if (interactor == null)
                 return;
@@ -567,11 +648,10 @@ namespace SpyQuarrelRuntime
                 return false;
             }
 
-            int attempts =
-                Mathf.Max(
-                    1,
-                    _randomDestinationAttempts
-                );
+            int attempts = Mathf.Max(
+                1,
+                _randomDestinationAttempts
+            );
 
             for (int i = 0; i < attempts; i++)
             {
@@ -644,12 +724,14 @@ namespace SpyQuarrelRuntime
                 return false;
             }
 
-            _agentDestination = hit.position;
+            _agentDestination =
+                hit.position;
 
             return true;
         }
 
-        public void SetAnimation(NpcAnimState animState)
+        public void SetAnimation(
+            NpcAnimState animState)
         {
             IdentityProvider.SetAnimation(animState);
         }
@@ -702,31 +784,44 @@ namespace SpyQuarrelRuntime
                 return;
 
             Vector3 velocity =
-                _agent != null && _agent.enabled
+                _agent != null &&
+                _agent.enabled
                     ? _agent.velocity
                     : Vector3.zero;
 
             SendVelocityRpc(velocity);
         }
 
-        private void OnCollisionEnter(Collision other)
+        private void OnCollisionEnter(
+            Collision other)
         {
-            Debug.Log($"Collision Enter: {other.collider.gameObject.name}");
-            if (other.collider.transform.root.gameObject.TryGetComponent(out Player player) ||
-                other.collider.TryGetComponent(out PlayerCharacter playerCharacter))
+            Debug.Log(
+                $"Collision Enter: {other.collider.gameObject.name}"
+            );
+
+            if (other.collider.transform.root.gameObject
+                    .TryGetComponent(out Player player) ||
+                other.collider.TryGetComponent(
+                    out PlayerCharacter playerCharacter))
             {
                 SetAnimation(NpcAnimState.Move);
             }
         }
 
-        private void OnCollisionStay(Collision other)
+        private void OnCollisionStay(
+            Collision other)
         {
-            Debug.Log($"Collision Stay: {other.collider.gameObject.name}");
+            Debug.Log(
+                $"Collision Stay: {other.collider.gameObject.name}"
+            );
         }
 
-        private void OnTriggerStay(Collider other)
+        private void OnTriggerStay(
+            Collider other)
         {
-            Debug.Log($"Trigger Stay: {other.gameObject.name}");
+            Debug.Log(
+                $"Trigger Stay: {other.gameObject.name}"
+            );
         }
 
         [Rpc(SendTo.NotServer)]

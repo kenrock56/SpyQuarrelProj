@@ -1,6 +1,8 @@
 using System;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
+using Random = System.Random;
 
 namespace SpyQuarrelRuntime
 {
@@ -9,7 +11,8 @@ namespace SpyQuarrelRuntime
         private static readonly int _singAnim = Animator.StringToHash("StandingSing");
 
         [SerializeField]private PatrolPoint _patrolPoint;
-        
+
+        [SerializeField] private bool _isOccupied;
         
         void Awake()
         {
@@ -21,15 +24,11 @@ namespace SpyQuarrelRuntime
         {
             if (other.TryGetComponent(out NPCharacter character))
             {
-                Debug.Log($"{character.name} has entered the SingingInteraction");
-                
-                var pos = _patrolPoint ? _patrolPoint.transform.position : transform.position;
-                character.StopPatrol();
-                
-                character.transform.position = pos;
-                character.transform.forward = _patrolPoint.transform.forward;
-                
-                character.SetAnimation(NpcAnimState.Sing);
+                if (!_isOccupied)
+                {
+                    _ = StartNpcSingingInteraction(character);
+                }
+               
             }
             
             Debug.Log($"{other.name} has entered the SingingInteraction");
@@ -37,9 +36,44 @@ namespace SpyQuarrelRuntime
             
         }
 
+
+        private async Task StartNpcSingingInteraction(NPCharacter character)
+        {
+            _isOccupied = true;
+            var pos = _patrolPoint ? _patrolPoint.transform.position : transform.position;
+            character.StopPatrol();
+            character.RequestDestination(pos);
+            
+                
+            character.SetAnimation(NpcAnimState.Sing);
+
+            var time = UnityEngine.Random.Range(4f, 5f);
+            var timeElapsed = 0f;
+            while (timeElapsed <= time)
+            {
+                timeElapsed += Time.deltaTime;
+                
+                Debug.Log($"{time - timeElapsed}");
+                await Awaitable.EndOfFrameAsync();
+            }
+            
+            
+            
+            character.SetAnimation(NpcAnimState.Move);
+            await Awaitable.WaitForSecondsAsync(2f);
+            _ = DelayedReset();
+            character.StartPatrol();
+        }
+
         private void OnTriggerStay(Collider other)
         {
             //Debug.Log($"{other.name} is inside the SingingInteraction");
+        }
+
+        private async Task DelayedReset()
+        {
+            await Awaitable.WaitForSecondsAsync(4f);
+            _isOccupied = false;
         }
 
         private void OnDrawGizmos()
