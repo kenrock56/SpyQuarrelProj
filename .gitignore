@@ -19,6 +19,9 @@
 Assets/npc_casual_set_00/
 Assets/MoCapCentral/
 Assets/Kevin Iglesias/
+Assets/SimpleInteriorsHouses
+Assets/SimpleItems
+Assets/SimpleProps
 
 # By default unity supports Blender asset imports, *.blend1 blender files do not need to be commited to version control.
 *.blend1

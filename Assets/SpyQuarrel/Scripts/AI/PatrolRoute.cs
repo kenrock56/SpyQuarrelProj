@@ -54,19 +54,30 @@ namespace SpyQuarrelRuntime
         }
 
 #if UNITY_EDITOR
-        private void OnDrawGizmos()
+        private  void OnDrawGizmos()
         {
-            if (_patrolPoints is { Length: <= 0 })return;
-            DrawLineToLine(_patrolPoints);
+            DrawPatrolPoints(Color.red);
         }
 
-        private void DrawLineToLine(PatrolPoint[] points)
+        public void DrawPatrolPoints(Color color)
         {
-            var locs = points.Select(point => point.transform.position).ToList();
-            locs.Add(points[0].transform.position);
-            var locArray = locs.ToArray();
+            if (_patrolPoints is { Length: <= 0 })return;
+            DrawLineToLine(_patrolPoints, color);
+        }
+
+        public static void DrawLineToLine(PatrolPoint[] points, Color colour = default)
+        {
+            var col = colour == default ? Color.white : colour;
             
-            Handles.DrawPolyLine(locArray);
+            using (new Handles.DrawingScope(col))
+            {
+                var locs = points.Select(point => point.transform.position).ToList();
+                locs.Add(points[0].transform.position);
+                var locArray = locs.ToArray();
+                Handles.DrawPolyLine(locArray);
+            }
+            
+            
         }
         #endif
        

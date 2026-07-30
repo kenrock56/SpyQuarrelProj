@@ -101,24 +101,7 @@ namespace SpyQuarrelRuntime
             _agent.updateRotation = false;
         }
 
-        private void TurnAgent(Vector3 destination)
-        {
-            Vector3 difference = destination - _agent.transform.position;
-
-            if (difference.magnitude < 0.1f)
-                return;
-
-            Vector3 direction = difference.normalized;
-
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-
-            Quaternion rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.unscaledDeltaTime * 15f);
-
-            rotation.x = 0f;
-            rotation.z = 0f;
-
-            transform.rotation = rotation;
-        }
+       
 
         public override void OnNetworkSpawn()
         {
@@ -175,14 +158,11 @@ namespace SpyQuarrelRuntime
         private void Update()
         {
             if (!IsSpawned || _agent == null)
-            {
                 return;
-            }
-
-            TurnAgent(_agent.destination);
 
             if (IsServer)
             {
+                TurnAgent(_agent.desiredVelocity);
                 UpdateServerMovement();
                 _identityProvider?.UpdateLocal();
             }
@@ -192,6 +172,20 @@ namespace SpyQuarrelRuntime
             }
         }
 
+        private void TurnAgent(Vector3 direction)
+        {
+            direction.y = 0f;
+
+            if (direction.sqrMagnitude < 0.01f)
+                return;
+
+            Quaternion targetRotation = Quaternion.LookRotation(direction.normalized);
+
+            var rot = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 15f);
+            
+            transform.rotation = rot;
+        }
+
         public void SetRouteRpc(PatrolRouteReference routeReference)
         {
             if (!IsSpawned) return;
@@ -199,11 +193,14 @@ namespace SpyQuarrelRuntime
             if (IsServer)
             {
                 ApplyRouteReference(routeReference);
+                
             }
             else
             {
                 RequestSetRouteRpc(routeReference);
             }
+            
+            StartPatrol();
         }
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
@@ -397,18 +394,15 @@ namespace SpyQuarrelRuntime
             }
         }
 
-        private void SetUpdateRotation(
-            bool shouldUpdate)
+        private void SetUpdateRotation(bool shouldUpdate)
         {
             if (_agent != null)
             {
-                _agent.updateRotation =
-                    shouldUpdate;
+                _agent.updateRotation = shouldUpdate;
             }
         }
 
-        public void RequestDestination(
-            Vector3 destination)
+        public void RequestDestination(Vector3 destination)
         {
             if (!IsSpawned)
                 return;
@@ -450,38 +444,25 @@ namespace SpyQuarrelRuntime
             }
         }
 
-        [Rpc(
-            SendTo.Server,
-            InvokePermission = RpcInvokePermission.Everyone
-        )]
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         private void StartPatrolRpc()
         {
             StartPatrolServer();
         }
 
-        [Rpc(
-            SendTo.Server,
-            InvokePermission = RpcInvokePermission.Everyone
-        )]
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         private void StopPatrolRpc()
         {
             StopPatrolServer();
         }
 
-        [Rpc(
-            SendTo.Server,
-            InvokePermission = RpcInvokePermission.Everyone
-        )]
-        private void RequestDestinationRpc(
-            Vector3 destination)
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        private void RequestDestinationRpc(Vector3 destination)
         {
             SetDestinationOverride(destination);
         }
 
-        [Rpc(
-            SendTo.Server,
-            InvokePermission = RpcInvokePermission.Everyone
-        )]
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         private void RequestRandomDestinationRpc()
         {
             SetRandomDestinationOverride();
@@ -808,27 +789,26 @@ namespace SpyQuarrelRuntime
             }
         }
 
-        private void OnCollisionStay(
-            Collision other)
+        private void OnCollisionStay(Collision other)
         {
-            Debug.Log(
-                $"Collision Stay: {other.collider.gameObject.name}"
-            );
+            Debug.Log($"Collision Stay: {other.collider.gameObject.name}");
         }
 
-        private void OnTriggerStay(
-            Collider other)
+        private void OnTriggerStay(Collider other)
         {
-            Debug.Log(
-                $"Trigger Stay: {other.gameObject.name}"
-            );
+            Debug.Log($"Trigger Stay: {other.gameObject.name}");
         }
 
         [Rpc(SendTo.NotServer)]
-        private void SendVelocityRpc(
-            Vector3 velocity)
+        private void SendVelocityRpc(Vector3 velocity)
         {
             _networkVelocity = velocity;
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (!_patrolRoute) return;
+            _patrolRoute.DrawPatrolPoints(Color.yellow);
         }
     }
 }

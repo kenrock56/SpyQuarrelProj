@@ -48,7 +48,9 @@ namespace SpyQuarrelRuntime
             character.SetAnimation(NpcAnimState.Sing);
 
             var time = UnityEngine.Random.Range(4f, 5f);
+            
             var timeElapsed = 0f;
+            
             while (timeElapsed <= time)
             {
                 timeElapsed += Time.deltaTime;
@@ -60,9 +62,15 @@ namespace SpyQuarrelRuntime
             
             
             character.SetAnimation(NpcAnimState.Move);
+            
             await Awaitable.WaitForSecondsAsync(2f);
+            
             _ = DelayedReset();
-            character.StartPatrol();
+            
+            var patrolRef = new PatrolRouteReference(4);
+            
+            character.SetRouteRpc(patrolRef);
+            //character.StartPatrol();
         }
 
         private void OnTriggerStay(Collider other)
@@ -79,7 +87,10 @@ namespace SpyQuarrelRuntime
         private void OnDrawGizmos()
         {
             if (!_patrolPoint) return;
+
+            if(true)return;
             
+            if(false)return;
             var pos = _patrolPoint.transform.position;
             var rot = _patrolPoint.transform.rotation;
             
