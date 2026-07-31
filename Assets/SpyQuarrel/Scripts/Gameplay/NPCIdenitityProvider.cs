@@ -8,6 +8,9 @@ namespace SpyQuarrelRuntime
         private static readonly int Speed = Animator.StringToHash("Speed");
         private static readonly int _moveHash = Animator.StringToHash("Move");
         private static readonly int _singHash = Animator.StringToHash("StandingSing");
+        private static readonly int _standToSit = Animator.StringToHash("StandToSit");
+        private static readonly int _sitting = Animator.StringToHash("Sitting");
+        private static readonly int _sitToStand = Animator.StringToHash("SitToStand");
 
         
         private Dictionary<NpcAnimState, int> _animStateDictionary = new Dictionary<NpcAnimState, int>();
@@ -93,6 +96,9 @@ namespace SpyQuarrelRuntime
 
             _animStateDictionary.TryAdd(NpcAnimState.Move, _moveHash);
             _animStateDictionary.TryAdd(NpcAnimState.Sing, _singHash);
+            _animStateDictionary.TryAdd(NpcAnimState.StandToSit, _standToSit);
+            _animStateDictionary.TryAdd(NpcAnimState.Sit, _sitting);
+            _animStateDictionary.TryAdd(NpcAnimState.SitToStand, _sitToStand);
         }
         private void InitialiseAnimator()
         {

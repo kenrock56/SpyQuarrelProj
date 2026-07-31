@@ -28,13 +28,17 @@ namespace SpyQuarrelRuntime
                 {
                     _ = StartNpcSingingInteraction(character);
                 }
-               
+                
+            } 
+            if (other.TryGetComponent(out PlayerCharacter playerCharacter) && playerCharacter.transform.root.TryGetComponent(out SpyCharacter spyChar) )
+            {
+                spyChar.NpcIdentityProvider.SetAnimation(NpcAnimState.Sit);
             }
             
             Debug.Log($"{other.name} has entered the SingingInteraction");
             
-            
         }
+        
 
 
         private async Task StartNpcSingingInteraction(NPCharacter character)
@@ -45,11 +49,13 @@ namespace SpyQuarrelRuntime
             character.RequestDestination(pos);
             
                 
-            character.SetAnimation(NpcAnimState.Sing);
+            character.SetAnimation(NpcAnimState.Sit);
 
-            var time = UnityEngine.Random.Range(4f, 5f);
+            var time = UnityEngine.Random.Range(10f, 11f);
             
             var timeElapsed = 0f;
+            
+            
             
             while (timeElapsed <= time)
             {
@@ -75,7 +81,8 @@ namespace SpyQuarrelRuntime
 
         private void OnTriggerStay(Collider other)
         {
-            //Debug.Log($"{other.name} is inside the SingingInteraction");
+            Debug.Log($"SING: {other.name} is inside the SingingInteraction");
+            
         }
 
         private async Task DelayedReset()

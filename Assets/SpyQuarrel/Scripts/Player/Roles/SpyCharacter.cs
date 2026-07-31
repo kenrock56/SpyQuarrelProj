@@ -7,7 +7,9 @@ namespace SpyQuarrelRuntime
 {
     public class SpyCharacter : Player
     {
-        [Header("Disguise Refs")]
+        public NPCIdenitityProvider NpcIdentityProvider => _provider;
+        
+        [Header("Disguise Refs")] 
         [SerializeField] private NPCIdenitityProvider _provider;
         [SerializeField] private PlayerDisguise _playerDisguise;
 
@@ -67,8 +69,7 @@ namespace SpyQuarrelRuntime
                     _provider.UpdateRemote();
                 }
 
-                _playerDisguise.SetRotationImmediate(_networkRotationY.Value
-                );
+                _playerDisguise.SetRotationImmediate(_networkRotationY.Value);
             }
         }
 

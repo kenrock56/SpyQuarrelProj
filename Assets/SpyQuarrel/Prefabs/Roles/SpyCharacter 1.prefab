@@ -270,7 +270,7 @@ MonoBehaviour:
   StableGroundLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  DiscreteCollisionEvents: 0
+  DiscreteCollisionEvents: 1
   StepHandling: 1
   MaxStepHeight: 0.5
   AllowSteppingWithoutStableGrounding: 0
@@ -703,19 +703,50 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3124264737214782948, guid: 8458ae657500bc945b4c0674645db9c8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2343731449338579387}
   m_SourcePrefab: {fileID: 100100000, guid: 8458ae657500bc945b4c0674645db9c8, type: 3}
 --- !u!114 &1319377497183581525 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2424313195169717567, guid: 8458ae657500bc945b4c0674645db9c8, type: 3}
   m_PrefabInstance: {fileID: 3741289344856975466}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1778962465884747150}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 503f8909b0233d84d9869c629b9282a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1778962465884747150 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3124264737214782948, guid: 8458ae657500bc945b4c0674645db9c8, type: 3}
+  m_PrefabInstance: {fileID: 3741289344856975466}
+  m_PrefabAsset: {fileID: 0}
+--- !u!136 &2343731449338579387
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1778962465884747150}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!4 &1885932047667659804 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3010541876226223222, guid: 8458ae657500bc945b4c0674645db9c8, type: 3}

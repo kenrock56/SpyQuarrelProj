@@ -5,6 +5,9 @@ namespace SpyQuarrelRuntime
     public enum NpcAnimState
     {
         Move,
-        Sing
+        Sing,
+        StandToSit,
+        Sit,
+        SitToStand
     }
 }
