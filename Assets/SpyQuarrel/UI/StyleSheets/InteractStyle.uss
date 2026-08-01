@@ -1,0 +1,17 @@
+.interact-root {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    flex-grow: 0;
+    background-color: rgba(255, 255, 255, 0);
+    width: 95%;
+    height: 90%;
+    align-items: center;
+}
+
+.interact-label {
+    font-size: 20px;
+}

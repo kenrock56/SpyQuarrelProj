@@ -10,6 +10,8 @@ namespace SpyQuarrelRuntime
 
         bool IsInteractable { get; }
 
+        bool IsWorldSpaceUI { get; }
+
         void OnInteractEnter(Interactor interactor)
         {
             Debug.Log("OnInteractEnter");

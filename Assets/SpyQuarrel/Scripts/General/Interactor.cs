@@ -1,10 +1,20 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SpyQuarrelRuntime
 {
     public class Interactor : MonoBehaviour
     {
         [field:SerializeField]public PlayerRole PlayerRole { get; private set; }
+
+        [SerializeField]private UIDocument _interactDocument;
+
+        private VisualElement _interactRoot;
+        private Label _interactName;
+        private Label _interactDescription;
+        private Label _interactButton;
+        
+        
         
         public IInteractable CurrentInteractable => _currentInteractable;
         private IInteractable _currentInteractable;
@@ -114,6 +124,20 @@ namespace SpyQuarrelRuntime
 
             _currentInteractable.OnInteractExit(this);
             _currentInteractable = null;
+        }
+
+        private void SetupUI()
+        {
+            if (_interactDocument == null)
+            {
+                _interactDocument = transform.root.GetComponentInChildren<UIDocument>();
+            }
+            
+            _interactRoot = _interactDocument.rootVisualElement;
+            
+            if (_interactRoot == null)return;
+            
+            _interactName = _interactRoot.Q<Label>("InteractName");
         }
         
 

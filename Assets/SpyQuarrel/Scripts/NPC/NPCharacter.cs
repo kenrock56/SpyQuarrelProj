@@ -13,6 +13,7 @@ namespace SpyQuarrelRuntime
         public string InteractDescription => "press blah to blah";
 
         public bool IsInteractable => true;
+        public bool IsWorldSpaceUI { get; set; } = true;
 
         [Header("Patrol Settings")]
         [SerializeField] private PatrolRoute _patrolRoute;

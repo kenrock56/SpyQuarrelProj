@@ -1,0 +1,12 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/SpyQuarrel/UI/StyleSheets/InteractStyle.uss?fileID=7433441132597879392&amp;guid=3fac51ab7734a79459db8fd00b62dfd6&amp;type=3#InteractStyle" />
+    <ui:VisualElement name="root" class="interact-root">
+        <ui:VisualElement name="container" class="container" style="justify-content: center;">
+            <ui:VisualElement name="interact-root" style="flex-grow: 0; background-color: rgba(91, 86, 86, 0.51); width: 50%; height: 50%; align-items: center; justify-content: center;">
+                <ui:Label text="[NAME]" name="interact-name" class="interact-label" />
+                <ui:Label text="[Press E to interact]" name="interact-description" class="interact-label" />
+                <ui:Label text="[E]" name="interact-button" class="interact-label" style="font-size: 27px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

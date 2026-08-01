@@ -6,7 +6,9 @@ namespace SpyQuarrelRuntime
     {
         [SerializeField] private GameObject _uiContainer;
 
+        
         public bool IsInteractable => true;
+        [field:SerializeField]public bool IsWorldSpaceUI { get; set; } = true;
 
         public string InteractName => "Sniper Point";
         public string InteractDescription => "Teleport";

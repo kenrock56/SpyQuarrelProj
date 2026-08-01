@@ -7,8 +7,9 @@ namespace SpyQuarrelRuntime
         [field:SerializeField]public string InteractName { get; set; }
         [field:SerializeField]public string InteractDescription { get; set; }
         [field: SerializeField] public bool IsInteractable { get; set; } = true;
+        public bool IsWorldSpaceUI { get; set; }  = false;
 
-        
+
         [SerializeField]private bool _isSelected = false;
         
         public void OnInteractEnter(Interactor interactor)
