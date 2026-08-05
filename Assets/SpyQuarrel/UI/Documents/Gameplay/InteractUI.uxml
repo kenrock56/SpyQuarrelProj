@@ -6,6 +6,7 @@
                 <ui:Label text="[NAME]" name="interact-name" class="interact-label" />
                 <ui:Label text="[Press E to interact]" name="interact-description" class="interact-label" />
                 <ui:Label text="[E]" name="interact-button" class="interact-label" style="font-size: 27px;" />
+                <ui:ProgressBar value="0" name="interact-progress" title="[]" high-value="1" class="progress-bar" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

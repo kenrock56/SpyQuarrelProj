@@ -17,19 +17,22 @@ namespace SpyQuarrelRuntime
         [SerializeField] private float _minimumRotationDifference = 0.25f;
         [SerializeField] private float _maximumUpdatesPerSecond = 20f;
 
+        [SerializeField]private InteractUI _interactUI;
+        
         private float _lastSubmittedRotation;
         private float _nextRotationUpdateTime;
 
         private readonly NetworkVariable<float> _networkRotationY = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
         private readonly NetworkVariable<NpcType> _networkAppearance = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-
+        
+        
         public override void OnNetworkSpawn()
         {
-            base.OnNetworkSpawn();
-
             InitComponents();
-
+            
+            base.OnNetworkSpawn();
+            
             _networkRotationY.OnValueChanged += OnRotationUpdate;
 
             _networkAppearance.OnValueChanged += OnAppearanceChange;
@@ -133,6 +136,11 @@ namespace SpyQuarrelRuntime
             {
                 _provider = GetComponentInChildren<NPCIdenitityProvider>(true);
             }
+
+            if (_interactUI == null)
+            {
+                _interactUI = GetComponentInChildren<InteractUI>(true);
+            }
         }
 
         private void UpdateSpyInput()
@@ -147,6 +155,20 @@ namespace SpyQuarrelRuntime
             
             SetAppearance(newType);
         }
+
+        protected override void EnableLocalItems()
+        {
+            base.EnableLocalItems();
+        }
+
+        protected override void DisableLocalItems()
+        {
+            base.DisableLocalItems();
+            
+            _interactUI.gameObject.SetActive(false);
+        }
+        
+        
 
         private static NpcType GetRandomNpcType()
         {

@@ -8,12 +8,14 @@ namespace SpyQuarrelRuntime
 {
     public class NPCharacter : NetworkBehaviour, IAnimatorContext, IInteractable
     {
+        public bool HoldInteraction { get; private set; } = true;
+        public float HoldInteractionTime { get; private set; } = 5f;
         public string InteractName => "Jeff";
 
         public string InteractDescription => "press blah to blah";
 
         public bool IsInteractable => true;
-        public bool IsWorldSpaceUI { get; set; } = true;
+        public bool IsWorldSpaceUI { get; set; } = false;
 
         [Header("Patrol Settings")]
         [SerializeField] private PatrolRoute _patrolRoute;
@@ -44,6 +46,7 @@ namespace SpyQuarrelRuntime
         private float _nextStateTime;
 
         private readonly NetworkVariable<NpcType> _networkAppearance = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        
 
         public Vector3 Velocity
         {
@@ -110,8 +113,7 @@ namespace SpyQuarrelRuntime
 
             InitComponents();
 
-            _networkAppearance.OnValueChanged +=
-                OnNetworkAppearanceChanged;
+            _networkAppearance.OnValueChanged += OnNetworkAppearanceChanged;
 
             if (_agent == null)
             {
@@ -194,7 +196,6 @@ namespace SpyQuarrelRuntime
             if (IsServer)
             {
                 ApplyRouteReference(routeReference);
-                
             }
             else
             {
@@ -271,14 +272,12 @@ namespace SpyQuarrelRuntime
             }
         }
 
-        private void SetAppearanceServer(
-            NpcType identity)
+        private void SetAppearanceServer(NpcType identity)
         {
             if (!IsServer)
                 return;
 
-            bool valueChanged =
-                !_networkAppearance.Value.Equals(identity);
+            bool valueChanged = !_networkAppearance.Value.Equals(identity);
 
             _networkAppearance.Value =
                 identity;
@@ -290,32 +289,24 @@ namespace SpyQuarrelRuntime
             RebuildAppearanceRpc(identity);
         }
 
-        [Rpc(
-            SendTo.Server,
-            InvokePermission = RpcInvokePermission.Everyone
-        )]
-        private void RequestSetAppearanceRpc(
-            NpcType identity)
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        private void RequestSetAppearanceRpc(NpcType identity)
         {
             SetAppearanceServer(identity);
         }
 
         [Rpc(SendTo.NotServer)]
-        private void RebuildAppearanceRpc(
-            NpcType identity)
+        private void RebuildAppearanceRpc(NpcType identity)
         {
             ApplyAppearance(identity);
         }
 
-        private void OnNetworkAppearanceChanged(
-            NpcType previousIdentity,
-            NpcType newIdentity)
+        private void OnNetworkAppearanceChanged(NpcType previousIdentity, NpcType newIdentity)
         {
             ApplyAppearance(newIdentity);
         }
 
-        private void ApplyAppearance(
-            NpcType identity)
+        private void ApplyAppearance(NpcType identity)
         {
             if (_identityProvider == null)
                 return;
@@ -433,15 +424,25 @@ namespace SpyQuarrelRuntime
             }
         }
 
+
+        public void OnInteractHover(Interactor interactor)
+        {
+            Debug.Log("OnInteractHover");
+        }
+
+        public void OnInteractExit(Interactor interactor)
+        {
+            Debug.Log("OnInteractExit");
+        }
+
         public void Interact(Interactor interactor)
         {
             if (interactor == null)
                 return;
 
-            if (interactor.transform.root.TryGetComponent(
-                    out SpyCharacter spyCharacter))
+            if (interactor.transform.root.TryGetComponent(out SpyCharacter spyCharacter))
             {
-                SetAnimation(NpcAnimState.Move);
+                spyCharacter.SetAppearance(_identityProvider.NpcIdentityType);
             }
         }
 

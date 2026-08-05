@@ -4,6 +4,8 @@ namespace SpyQuarrelRuntime
 {
     public class InteractableObject : MonoBehaviour, IInteractable
     {
+        public bool HoldInteraction { get; }
+        public float HoldInteractionTime { get; }
         [field:SerializeField]public string InteractName { get; set; }
         [field:SerializeField]public string InteractDescription { get; set; }
         [field: SerializeField] public bool IsInteractable { get; set; } = true;
@@ -12,10 +14,17 @@ namespace SpyQuarrelRuntime
 
         [SerializeField]private bool _isSelected = false;
         
+
         public void OnInteractEnter(Interactor interactor)
         {
             _isSelected = true;
         }
+
+        public void OnInteractHover(Interactor interactor)
+        {
+            
+        }
+
 
         public void OnInteractExit(Interactor interactor)
         {

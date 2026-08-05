@@ -1,11 +1,15 @@
-using System;
 using UnityEngine;
 
 namespace SpyQuarrelRuntime
 {
     public interface IInteractable
     {
+        bool HoldInteraction { get; }
+
+        float HoldInteractionTime { get; }
+
         string InteractName { get; }
+
         string InteractDescription { get; }
 
         bool IsInteractable { get; }
@@ -17,20 +21,10 @@ namespace SpyQuarrelRuntime
             Debug.Log("OnInteractEnter");
         }
 
-        void OnInteractHover(Interactor interactor)
-        {
-            Debug.Log("OnInteractHover");
-        }
+        void OnInteractHover(Interactor interactor);
 
-        void OnInteractExit(Interactor interactor)
-        {
-            Debug.Log("OnInteractExit");
-        }
+        void OnInteractExit(Interactor interactor);
 
-        void Interact(Interactor interactor)
-        {
-            Debug.Log("Interact");
-        }
-        
+        void Interact(Interactor interactor);
     }
 }

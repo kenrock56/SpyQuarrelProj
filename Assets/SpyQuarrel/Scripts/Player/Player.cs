@@ -165,8 +165,8 @@ namespace SpyQuarrelRuntime
                 {
                     if (hit.point == Vector3.zero)
                         return;
-
-                    Teleport(hit.point);
+                    TeleportCheat(hit.point);
+                    //Teleport(hit.point);
                 }
             }
         }
@@ -402,6 +402,11 @@ namespace SpyQuarrelRuntime
             SendStateToObserversRpc(CreateImpliedStatePayload(state));
         }
 
+
+        private void TeleportCheat(Vector3 position)
+        {
+            _character.Teleport(position);
+        }
         private void ApplyTeleportState(Vector3 position, int tick, bool writeClientBuffer, bool writeServerBuffer)
         {
             if (tick < 0)
@@ -516,7 +521,7 @@ namespace SpyQuarrelRuntime
             }
         }
 
-        private void DisableLocalItems()
+        protected virtual void DisableLocalItems()
         {
             if (_inputController != null)
                 _inputController.enabled = false;

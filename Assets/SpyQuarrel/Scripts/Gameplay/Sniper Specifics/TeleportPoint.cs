@@ -10,12 +10,16 @@ namespace SpyQuarrelRuntime
         public bool IsInteractable => true;
         [field:SerializeField]public bool IsWorldSpaceUI { get; set; } = true;
 
+
+        public bool HoldInteraction { get; }
+        public float HoldInteractionTime { get; }
         public string InteractName => "Sniper Point";
         public string InteractDescription => "Teleport";
 
         private Transform _cameraTransform;
         private Transform _localPlayerTransform;
-        
+      
+
 
         private void Awake()
         {

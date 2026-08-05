@@ -18,6 +18,8 @@ namespace SpyQuarrelRuntime
 
         public bool InteractHeld => _interactHeld;
         private bool _interactHeld;
+
+        public bool InteractPressed => _playerInputActions.Player.Interact.WasPressedThisFrame();
         
         
         [SerializeField] private Vector2 _moveInput = Vector2.zero;
