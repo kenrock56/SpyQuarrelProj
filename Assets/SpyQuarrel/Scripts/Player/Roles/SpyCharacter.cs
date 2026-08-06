@@ -159,6 +159,21 @@ namespace SpyQuarrelRuntime
         protected override void EnableLocalItems()
         {
             base.EnableLocalItems();
+
+            var interactor = transform.root.GetComponentInChildren<Interactor>();
+            
+            
+            
+            
+            if (interactor != null)
+            {
+                Debug.Log("Interactor found");
+                interactor.BuildWorldSpaceUI();
+            }
+            else
+            {
+                Debug.LogError("No Interactor found");
+            }
         }
 
         protected override void DisableLocalItems()

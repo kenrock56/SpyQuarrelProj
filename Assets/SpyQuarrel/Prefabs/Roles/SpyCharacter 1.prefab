@@ -48,7 +48,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _firstPersonCamera: {fileID: 0}
   _thirdPersonCamera: {fileID: 0}
-  _startingCameraMode: 1
+  _startingCameraMode: 0
   _mouseSensitivity: {x: 0.5, y: 0.5}
   _minPitch: -85
   _maxPitch: 85
@@ -597,6 +597,7 @@ MonoBehaviour:
   _playerDisguise: {fileID: 3193604553710358094}
   _minimumRotationDifference: 0.25
   _maximumUpdatesPerSecond: 20
+  _interactUI: {fileID: 0}
 --- !u!114 &3489075128166846139
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -610,6 +611,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <PlayerRole>k__BackingField: 1
+  <Owner>k__BackingField: {fileID: 8091961108214859584}
+  _worldSpaceInteractPrefab: {fileID: 8761261808093206301, guid: cb7d4cc669cd4ca4e844c99fa8e6dab0, type: 3}
   _canInteract: 1
   _interactRange: 1000
   _inputController: {fileID: 1017511270945477725}

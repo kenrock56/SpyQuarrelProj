@@ -7,11 +7,13 @@ namespace SpyQuarrelRuntime
     {
         [field: SerializeField] public PlayerRole PlayerRole { get; private set; }
 
-        public Component Owner { get; private set; }
+        [field:SerializeField]public Component Owner { get; private set; }
         
         public event Action<IInteractable> OnInteractableChanged;
         public event Action<IInteractable, float> OnHoldProgressChanged;
 
+        
+        
         public IInteractable CurrentInteractable => _currentInteractable;
 
         public float HoldProgress { get; private set; }
@@ -21,6 +23,9 @@ namespace SpyQuarrelRuntime
             InteractHeld &&
             !_holdInteractionCompleted;
 
+        [SerializeField] private GameObject _worldSpaceInteractPrefab;
+        [SerializeField]private GameObject _worldSpaceInteractInstance;
+        
         [SerializeField] private bool _canInteract = true;
         [SerializeField] private float _interactRange = 10f;
         [SerializeField] private PlayerInputController _inputController;
@@ -50,7 +55,11 @@ namespace SpyQuarrelRuntime
 
         private void Awake()
         {
-            Owner = transform.root;
+            if (Owner == null)
+            {
+                Owner = transform.root;
+            }
+            
             if (Owner.TryGetComponent(out Player player))
             {
                 switch (player)
@@ -87,6 +96,16 @@ namespace SpyQuarrelRuntime
             }
         }
 
+        public void BuildWorldSpaceUI()
+        {
+            if (_worldSpaceInteractInstance)
+            {
+                Destroy(_worldSpaceInteractInstance);
+            }
+            
+            _worldSpaceInteractInstance = Instantiate(_worldSpaceInteractPrefab);
+        }
+
         private void Update()
         {
             if (!_cameraTransform || !_inputController || !_canInteract)
@@ -107,6 +126,14 @@ namespace SpyQuarrelRuntime
             }
 
             _currentInteractable.OnInteractHover(this);
+
+            if (_worldSpaceInteractInstance)
+            {
+                if(!_worldSpaceInteractInstance.activeSelf) 
+                    _worldSpaceInteractInstance.SetActive(true);
+
+                _worldSpaceInteractPrefab.transform.position = _endPos;
+            }
 
             HandleInteraction();
         }
