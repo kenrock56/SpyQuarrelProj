@@ -4,6 +4,9 @@ namespace SpyQuarrelRuntime
 {
     public interface IInteractable
     {
+        public PlayerRole RequiredRole { get; }
+        
+        Transform UIAnchorPoint => null;
         bool HoldInteraction { get; }
 
         float HoldInteractionTime { get; }
@@ -16,10 +19,7 @@ namespace SpyQuarrelRuntime
 
         bool IsWorldSpaceUI { get; }
 
-        void OnInteractEnter(Interactor interactor)
-        {
-            Debug.Log("OnInteractEnter");
-        }
+        void OnInteractEnter(Interactor interactor);
 
         void OnInteractHover(Interactor interactor);
 

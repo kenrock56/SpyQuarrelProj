@@ -6,14 +6,11 @@ namespace SpyQuarrelRuntime
     public class Interactor : MonoBehaviour
     {
         [field: SerializeField] public PlayerRole PlayerRole { get; private set; }
+        [field: SerializeField] public Component Owner { get; private set; }
 
-        [field:SerializeField]public Component Owner { get; private set; }
-        
         public event Action<IInteractable> OnInteractableChanged;
         public event Action<IInteractable, float> OnHoldProgressChanged;
 
-        
-        
         public IInteractable CurrentInteractable => _currentInteractable;
 
         public float HoldProgress { get; private set; }
@@ -23,9 +20,11 @@ namespace SpyQuarrelRuntime
             InteractHeld &&
             !_holdInteractionCompleted;
 
+        [Header("World Space Interaction UI")]
         [SerializeField] private GameObject _worldSpaceInteractPrefab;
-        [SerializeField]private GameObject _worldSpaceInteractInstance;
-        
+        [SerializeField] private GameObject _worldSpaceInteractInstance;
+
+        [Header("Interaction")]
         [SerializeField] private bool _canInteract = true;
         [SerializeField] private float _interactRange = 10f;
         [SerializeField] private PlayerInputController _inputController;
@@ -40,7 +39,6 @@ namespace SpyQuarrelRuntime
         private Vector3 _endPos;
 
         private float _holdTimer;
-
         private bool _holdInteractionCompleted;
 
         private bool InteractPress =>
@@ -55,11 +53,11 @@ namespace SpyQuarrelRuntime
 
         private void Awake()
         {
-            if (Owner == null)
+            if (!Owner)
             {
                 Owner = transform.root;
             }
-            
+
             if (Owner.TryGetComponent(out Player player))
             {
                 switch (player)
@@ -94,6 +92,8 @@ namespace SpyQuarrelRuntime
             {
                 _cameraTransform = Camera.main.transform;
             }
+
+            BuildWorldSpaceUI();
         }
 
         public void BuildWorldSpaceUI()
@@ -102,13 +102,27 @@ namespace SpyQuarrelRuntime
             {
                 Destroy(_worldSpaceInteractInstance);
             }
-            
-            _worldSpaceInteractInstance = Instantiate(_worldSpaceInteractPrefab);
+
+            if (!_worldSpaceInteractPrefab)
+            {
+                Debug.LogWarning(
+                    "[Interactor] No world-space interaction prefab assigned.",
+                    this);
+
+                return;
+            }
+
+            _worldSpaceInteractInstance =
+                Instantiate(_worldSpaceInteractPrefab);
+
+            _worldSpaceInteractInstance.SetActive(false);
         }
 
         private void Update()
         {
-            if (!_cameraTransform || !_inputController || !_canInteract)
+            if (!_cameraTransform ||
+                !_inputController ||
+                !_canInteract)
             {
                 _startPos = Vector3.zero;
                 _endPos = Vector3.zero;
@@ -125,32 +139,48 @@ namespace SpyQuarrelRuntime
                 return;
             }
 
-            _currentInteractable.OnInteractHover(this);
-
-            if (_worldSpaceInteractInstance)
+            if (!CanInteractWithRole(_currentInteractable))
             {
-                if(!_worldSpaceInteractInstance.activeSelf) 
-                    _worldSpaceInteractInstance.SetActive(true);
-
-                _worldSpaceInteractPrefab.transform.position = _endPos;
+                ClearInteractable();
+                return;
             }
 
+            _currentInteractable.OnInteractHover(this);
+
             HandleInteraction();
+        }
+
+        private void LateUpdate()
+        {
+            UpdateWorldSpaceUI();
         }
 
         private void UpdateInteractable()
         {
             _startPos = _cameraTransform.position;
-            _endPos = _startPos + _cameraTransform.forward * _interactRange;
+
+            _endPos =
+                _startPos +
+                _cameraTransform.forward * _interactRange;
 
             IInteractable hitInteractable = null;
 
-            if (Physics.Raycast(_startPos, _cameraTransform.forward, out RaycastHit interactHit, _interactRange))
+            if (Physics.Raycast(
+                    _startPos,
+                    _cameraTransform.forward,
+                    out RaycastHit interactHit,
+                    _interactRange))
             {
                 _endPos = interactHit.point;
 
-                interactHit.collider.TryGetComponent(
-                    out hitInteractable);
+                IInteractable hitInt =
+                    interactHit.collider
+                        .GetComponentInParent<IInteractable>();
+
+                if (CanInteractWithRole(hitInt))
+                {
+                    hitInteractable = hitInt;
+                }
             }
 
             if (hitInteractable == _currentInteractable)
@@ -167,9 +197,90 @@ namespace SpyQuarrelRuntime
             _currentInteractable?.OnInteractEnter(this);
         }
 
+        private bool CanInteractWithRole(
+            IInteractable interactable)
+        {
+            if (interactable == null)
+            {
+                return false;
+            }
+
+            return
+                interactable.RequiredRole == PlayerRole.None ||
+                interactable.RequiredRole == PlayerRole;
+        }
+
+        private void UpdateWorldSpaceUI()
+        {
+            if (!_worldSpaceInteractInstance)
+            {
+                return;
+            }
+
+            if (_currentInteractable == null ||
+                !_currentInteractable.IsWorldSpaceUI)
+            {
+                HideWorldSpaceUI();
+                return;
+            }
+
+            Transform anchor =
+                GetWorldSpaceUIAnchor(_currentInteractable);
+
+            if (!anchor)
+            {
+                HideWorldSpaceUI();
+                return;
+            }
+
+            if (!_worldSpaceInteractInstance.activeSelf)
+            {
+                _worldSpaceInteractInstance.SetActive(true);
+            }
+
+            _worldSpaceInteractInstance.transform.position =
+                anchor.position;
+        }
+
+        private Transform GetWorldSpaceUIAnchor(
+            IInteractable interactable)
+        {
+            if (interactable == null)
+            {
+                return null;
+            }
+
+            if (interactable.UIAnchorPoint)
+            {
+                return interactable.UIAnchorPoint;
+            }
+
+            if (interactable is Component component)
+            {
+                return component.transform;
+            }
+
+            return null;
+        }
+
+        private void HideWorldSpaceUI()
+        {
+            if (_worldSpaceInteractInstance &&
+                _worldSpaceInteractInstance.activeSelf)
+            {
+                _worldSpaceInteractInstance.SetActive(false);
+            }
+        }
+
         private void HandleInteraction()
         {
             if (!_currentInteractable.IsInteractable)
+            {
+                ResetHoldInteraction();
+                return;
+            }
+
+            if (!CanInteractWithRole(_currentInteractable))
             {
                 ResetHoldInteraction();
                 return;
@@ -219,11 +330,9 @@ namespace SpyQuarrelRuntime
             _holdTimer += Time.deltaTime;
 
             HoldProgress = Mathf.Clamp01(_holdTimer / holdDuration);
-            
+
             OnHoldProgressChanged?.Invoke(_holdInteractable, HoldProgress);
 
-            Debug.Log($"Progress: {HoldProgress}%");
-            
             if (_holdTimer >= holdDuration)
             {
                 CompleteHoldInteraction();
@@ -235,8 +344,11 @@ namespace SpyQuarrelRuntime
             ResetHoldInteraction();
 
             _holdInteractable = interactable;
+            
             _holdTimer = 0f;
+            
             HoldProgress = 0f;
+            
             _holdInteractionCompleted = false;
 
             OnHoldProgressChanged?.Invoke(_holdInteractable, HoldProgress);
@@ -250,11 +362,10 @@ namespace SpyQuarrelRuntime
             }
 
             _holdInteractionCompleted = true;
+            
             HoldProgress = 1f;
 
-            OnHoldProgressChanged?.Invoke(
-                _holdInteractable,
-                HoldProgress);
+            OnHoldProgressChanged?.Invoke(_holdInteractable, HoldProgress);
 
             _holdInteractable.Interact(this);
         }
@@ -268,12 +379,14 @@ namespace SpyQuarrelRuntime
                 return;
             }
 
-            IInteractable previousInteractable =
-                _holdInteractable;
+            IInteractable previousInteractable = _holdInteractable;
 
             _holdInteractable = null;
+            
             _holdTimer = 0f;
+            
             HoldProgress = 0f;
+            
             _holdInteractionCompleted = false;
 
             if (previousInteractable != null)
@@ -290,11 +403,15 @@ namespace SpyQuarrelRuntime
 
             if (_currentInteractable == null)
             {
+                HideWorldSpaceUI();
                 return;
             }
 
             _currentInteractable.OnInteractExit(this);
+
             SetInteractable(null);
+
+            HideWorldSpaceUI();
         }
 
         private void SetInteractable(IInteractable interactable)
@@ -306,7 +423,8 @@ namespace SpyQuarrelRuntime
 
             _currentInteractable = interactable;
 
-            OnInteractableChanged?.Invoke(_currentInteractable);
+            OnInteractableChanged?.Invoke(
+                _currentInteractable);
         }
 
         private void OnDisable()
@@ -315,6 +433,16 @@ namespace SpyQuarrelRuntime
 
             _startPos = Vector3.zero;
             _endPos = Vector3.zero;
+
+            HideWorldSpaceUI();
+        }
+
+        private void OnDestroy()
+        {
+            if (_worldSpaceInteractInstance)
+            {
+                Destroy(_worldSpaceInteractInstance);
+            }
         }
     }
 }

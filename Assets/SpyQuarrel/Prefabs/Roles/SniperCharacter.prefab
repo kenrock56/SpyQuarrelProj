@@ -336,6 +336,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea2f2cbd738570142927f7d3a601e138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _firstPersonCamera: {fileID: 0}
+  _thirdPersonCamera: {fileID: 0}
+  _startingCameraMode: 0
   _mouseSensitivity: {x: 0.5, y: 0.5}
   _minPitch: -85
   _maxPitch: 85
@@ -475,7 +478,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <PlayerRole>k__BackingField: 2
-  _canInteract: 0
+  <Owner>k__BackingField: {fileID: 8537578478031617071}
+  _worldSpaceInteractPrefab: {fileID: 0}
+  _worldSpaceInteractInstance: {fileID: 0}
+  _canInteract: 1
   _interactRange: 10000
   _inputController: {fileID: 205327034685397770}
 --- !u!1 &4939560541301924350

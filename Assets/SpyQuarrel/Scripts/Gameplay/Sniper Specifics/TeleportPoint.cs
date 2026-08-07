@@ -4,6 +4,8 @@ namespace SpyQuarrelRuntime
 {
     public class TeleportPoint : MonoBehaviour, IInteractable
     {
+        public PlayerRole RequiredRole { get; set; } = PlayerRole.Sniper;
+
         [SerializeField] private GameObject _uiContainer;
 
         

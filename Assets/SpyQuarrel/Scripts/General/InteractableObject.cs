@@ -4,6 +4,7 @@ namespace SpyQuarrelRuntime
 {
     public class InteractableObject : MonoBehaviour, IInteractable
     {
+        public PlayerRole RequiredRole { get; set; } =  PlayerRole.None;
         public bool HoldInteraction { get; }
         public float HoldInteractionTime { get; }
         [field:SerializeField]public string InteractName { get; set; }

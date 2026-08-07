@@ -8,6 +8,8 @@ namespace SpyQuarrelRuntime
 {
     public class NPCharacter : NetworkBehaviour, IAnimatorContext, IInteractable
     {
+        public PlayerRole RequiredRole { get; set; } = PlayerRole.None;
+        [field:SerializeField]public Transform UIAnchorPoint { get; set; }
         public bool HoldInteraction { get; private set; } = true;
         public float HoldInteractionTime { get; private set; } = 5f;
         public string InteractName => "Jeff";
@@ -15,7 +17,7 @@ namespace SpyQuarrelRuntime
         public string InteractDescription => "press blah to blah";
 
         public bool IsInteractable => true;
-        public bool IsWorldSpaceUI { get; set; } = false;
+        public bool IsWorldSpaceUI { get; set; } = true;
 
         [Header("Patrol Settings")]
         [SerializeField] private PatrolRoute _patrolRoute;
@@ -424,6 +426,11 @@ namespace SpyQuarrelRuntime
             }
         }
 
+
+        public void OnInteractEnter(Interactor interactor)
+        {
+            
+        }
 
         public void OnInteractHover(Interactor interactor)
         {

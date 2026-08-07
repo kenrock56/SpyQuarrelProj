@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &109527147194524280
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8829047586841165921}
+  m_Layer: 0
+  m_Name: Anchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8829047586841165921
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 109527147194524280}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.63, z: -1.47}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3755679095038282337}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &287800903506477297
 GameObject:
   m_ObjectHideFlags: 0
@@ -127,6 +158,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 400000, guid: 38779c9653e8f684cab84123989672e1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8496454880847371391}
+    - targetCorrespondingSourceObject: {fileID: 400000, guid: 38779c9653e8f684cab84123989672e1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8829047586841165921}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 100000, guid: 38779c9653e8f684cab84123989672e1, type: 3}
       insertIndex: -1
@@ -173,9 +207,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fd8e705291285e40abe78c70d95b9dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <UIAnchorPoint>k__BackingField: {fileID: 8829047586841165921}
   _frontLocalPos: {fileID: 8500729637325032355}
   _backLocalPos: {fileID: 8496454880847371391}
   _openAngle: 100
+  _lerpTime: 0.25
+  _isLerping: 0
 --- !u!4 &3755679095038282337 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 38779c9653e8f684cab84123989672e1, type: 3}

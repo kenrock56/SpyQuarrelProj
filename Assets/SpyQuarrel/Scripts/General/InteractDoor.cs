@@ -6,12 +6,14 @@ namespace SpyQuarrelRuntime
 {
     public class InteractDoor : MonoBehaviour, IInteractable
     {
+        public PlayerRole RequiredRole { get; set; } = PlayerRole.Spy;
+        [field:SerializeField]public Transform UIAnchorPoint { get; set; }
         public bool HoldInteraction => false;
         public float HoldInteractionTime => 0f;
         public string InteractName => _isOpen ? "Close Door" : "Open Door";
         public string InteractDescription => "Interact with door";
         public bool IsInteractable => !_isLerping;
-        public bool IsWorldSpaceUI => false;
+        public bool IsWorldSpaceUI => true;
 
         [Header("Side Positions")]
         [SerializeField] private Transform _frontLocalPos;
@@ -34,6 +36,11 @@ namespace SpyQuarrelRuntime
         {
             _closedRotation = transform.localRotation;
             _destroyCancellationToken = destroyCancellationToken;
+        }
+
+        public void OnInteractEnter(Interactor interactor)
+        {
+            
         }
 
         public void OnInteractHover(Interactor interactor)

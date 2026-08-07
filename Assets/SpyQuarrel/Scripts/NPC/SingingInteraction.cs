@@ -6,8 +6,21 @@ using Random = System.Random;
 
 namespace SpyQuarrelRuntime
 {
-    public class SingingInteraction : MonoBehaviour
+    public class SingingInteraction : MonoBehaviour, IInteractable
     {
+        
+        [Header("Interaction Settings")]
+        [field:SerializeField]public Transform UIAnchorPoint { get; set; }
+        public PlayerRole RequiredRole { get; set; } = PlayerRole.Spy;
+        public bool HoldInteraction { get; set; } = false;
+        public float HoldInteractionTime { get; set; } = 0f;
+        public string InteractName { get; set; } = "Sing";
+        public string InteractDescription { get; set; } = "Sing your heart out";
+        public bool IsInteractable { get; set; } = true;
+        public bool IsWorldSpaceUI { get; set; } = true;
+        
+        [Header("Other Settings")]
+        
         private static readonly int _singAnim = Animator.StringToHash("StandingSing");
 
         [SerializeField]private PatrolPoint _patrolPoint;
@@ -103,6 +116,27 @@ namespace SpyQuarrelRuntime
             
             //Handles.ArrowHandleCap();
         }
-        
+
+
+   
+        public void OnInteractEnter(Interactor interactor)
+        {
+            
+        }
+
+        public void OnInteractHover(Interactor interactor)
+        {
+            
+        }
+
+        public void OnInteractExit(Interactor interactor)
+        {
+           
+        }
+
+        public void Interact(Interactor interactor)
+        {
+            
+        }
     }
 }
