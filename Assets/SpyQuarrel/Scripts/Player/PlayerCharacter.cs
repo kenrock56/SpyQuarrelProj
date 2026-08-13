@@ -83,10 +83,10 @@ namespace SpyQuarrelRuntime
 
         public void Initialize()
         {
-            
+            _motor.CharacterController = this;
             
             _uncrouchOverlapResults = new Collider[8];
-
+            
             _currentState.Stance = PlayerStance.Standing;
             _currentState.Grounded = false;
 
@@ -94,7 +94,7 @@ namespace SpyQuarrelRuntime
 
             SwitchStance(_currentState.Stance);
 
-            _motor.CharacterController = this;
+           
         }
 
         //remember to change this for disguise system

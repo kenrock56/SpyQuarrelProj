@@ -44,19 +44,38 @@ namespace SpyQuarrelRuntime
 
         private bool _initialized;
 
-        void Awake()
-        {
-            if (_firstPersonCamera == null)
-            {
-                _firstPersonCamera = FindObjectsByType<CinemachineCamera>(sortMode: FindObjectsSortMode.None).First(cam => cam.gameObject.CompareTag(FIRST_PERSON));
-            }
+         void Awake()
+         {
+             //SetupCameras();
+         }
 
-            if (_thirdPersonCamera == null)
-            {
-               _thirdPersonCamera = FindObjectsByType<CinemachineCamera>(sortMode: FindObjectsSortMode.None).First(cam => cam.gameObject.CompareTag(THIRD_PERSON));
-            }
-        }
-        
+         private void SetupCameras()
+         {
+             var cameras = FindObjectsByType<CinemachineCamera>(
+                 FindObjectsInactive.Include,
+                 FindObjectsSortMode.None);
+
+             if (_firstPersonCamera == null)
+             {
+                 _firstPersonCamera = cameras.FirstOrDefault(cam => cam.CompareTag(FIRST_PERSON));
+
+                 if (_firstPersonCamera == null)
+                 {
+                     Debug.LogError($"[PlayerCamera] Could not find CinemachineCamera tagged '{FIRST_PERSON}'.", this);
+                 }
+             }
+
+             if (_thirdPersonCamera == null)
+             {
+                 _thirdPersonCamera = cameras.FirstOrDefault(cam => cam.CompareTag(THIRD_PERSON));
+
+                 if (_thirdPersonCamera == null)
+                 {
+                     Debug.LogError($"[PlayerCamera] Could not find CinemachineCamera tagged '{THIRD_PERSON}'.", this);
+                 }
+             }
+         }
+
         public void Initialize(Transform cameraTarget)
         {
             if (!cameraTarget)
@@ -65,6 +84,8 @@ namespace SpyQuarrelRuntime
                 return;
             }
 
+            SetupCameras();
+            
             _cameraTarget = cameraTarget;
 
             Vector3 startAngles = cameraTarget.eulerAngles;

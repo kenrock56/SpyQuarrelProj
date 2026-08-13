@@ -6,6 +6,7 @@ TagManager:
   tags:
   - FirstPersonCamera
   - ThirdPersonCamera
+  - DualRender
   layers:
   - Default
   - TransparentFX
@@ -14,8 +15,8 @@ TagManager:
   - Water
   - UI
   - Npc
-  - 
-  - 
+  - PostFx
+  - WeaponFP
   - 
   - 
   - 

@@ -161,6 +161,8 @@ namespace SpyQuarrelRuntime
             {
                 Ray ray = new Ray(_camera.transform.position, _camera.transform.forward);
 
+                Debug.DrawRay(ray.origin, ray.direction, Color.red);
+                
                 if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
                 {
                     if (hit.point == Vector3.zero)

@@ -27,49 +27,49 @@ namespace SpyQuarrelRuntime
     /// <code>
     /// using namespace UnityEngine;
     /// using UnityEngine.InputSystem;
-    ///
+    /// 
     /// // Example of using an InputActionMap named "Player" from a UnityEngine.MonoBehaviour implementing callback interface.
     /// public class Example : MonoBehaviour, MyActions.IPlayerActions
     /// {
     ///     private MyActions_Actions m_Actions;                  // Source code representation of asset.
     ///     private MyActions_Actions.PlayerActions m_Player;     // Source code representation of action map.
-    ///
+    /// 
     ///     void Awake()
     ///     {
     ///         m_Actions = new MyActions_Actions();              // Create asset object.
     ///         m_Player = m_Actions.Player;                      // Extract action map object.
     ///         m_Player.AddCallbacks(this);                      // Register callback interface IPlayerActions.
     ///     }
-    ///
+    /// 
     ///     void OnDestroy()
     ///     {
     ///         m_Actions.Dispose();                              // Destroy asset object.
     ///     }
-    ///
+    /// 
     ///     void OnEnable()
     ///     {
     ///         m_Player.Enable();                                // Enable all actions within map.
     ///     }
-    ///
+    /// 
     ///     void OnDisable()
     ///     {
     ///         m_Player.Disable();                               // Disable all actions within map.
     ///     }
-    ///
+    /// 
     ///     #region Interface implementation of MyActions.IPlayerActions
-    ///
+    /// 
     ///     // Invoked when "Move" action is either started, performed or canceled.
     ///     public void OnMove(InputAction.CallbackContext context)
     ///     {
     ///         Debug.Log($"OnMove: {context.ReadValue&lt;Vector2&gt;()}");
     ///     }
-    ///
+    /// 
     ///     // Invoked when "Attack" action is either started, performed or canceled.
     ///     public void OnAttack(InputAction.CallbackContext context)
     ///     {
     ///         Debug.Log($"OnAttack: {context.ReadValue&lt;float&gt;()}");
     ///     }
-    ///
+    /// 
     ///     #endregion
     /// }
     /// </code>
@@ -115,7 +115,7 @@ namespace SpyQuarrelRuntime
                     ""name"": ""Attack"",
                     ""type"": ""Button"",
                     ""id"": ""6c2ab1b8-8984-453a-af3d-a3c78ae1679a"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -151,7 +151,7 @@ namespace SpyQuarrelRuntime
                     ""name"": ""Previous"",
                     ""type"": ""Button"",
                     ""id"": ""2776c80d-3c14-4091-8c56-d04ced07a2b0"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -170,6 +170,15 @@ namespace SpyQuarrelRuntime
                     ""type"": ""Button"",
                     ""id"": ""641cd816-40e6-41b4-8c3d-04687c349290"",
                     ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ADS"",
+                    ""type"": ""Button"",
+                    ""id"": ""1c9a06a2-0276-40e5-82ef-96c68ec3e023"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -558,6 +567,28 @@ namespace SpyQuarrelRuntime
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Crouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6c24beb9-edb9-4ece-b398-bad95d64fb24"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""ADS"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5ca01baf-1501-41b1-896d-e9431382bddc"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ADS"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1154,6 +1185,7 @@ namespace SpyQuarrelRuntime
             m_Player_Previous = m_Player.FindAction("Previous", throwIfNotFound: true);
             m_Player_Next = m_Player.FindAction("Next", throwIfNotFound: true);
             m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
+            m_Player_ADS = m_Player.FindAction("ADS", throwIfNotFound: true);
             // UI
             m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
             m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1256,6 +1288,7 @@ namespace SpyQuarrelRuntime
         private readonly InputAction m_Player_Previous;
         private readonly InputAction m_Player_Next;
         private readonly InputAction m_Player_Sprint;
+        private readonly InputAction m_Player_ADS;
         /// <summary>
         /// Provides access to input actions defined in input action map "Player".
         /// </summary>
@@ -1303,6 +1336,10 @@ namespace SpyQuarrelRuntime
             /// Provides access to the underlying input action "Player/Sprint".
             /// </summary>
             public InputAction @Sprint => m_Wrapper.m_Player_Sprint;
+            /// <summary>
+            /// Provides access to the underlying input action "Player/ADS".
+            /// </summary>
+            public InputAction @ADS => m_Wrapper.m_Player_ADS;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -1356,6 +1393,9 @@ namespace SpyQuarrelRuntime
                 @Sprint.started += instance.OnSprint;
                 @Sprint.performed += instance.OnSprint;
                 @Sprint.canceled += instance.OnSprint;
+                @ADS.started += instance.OnADS;
+                @ADS.performed += instance.OnADS;
+                @ADS.canceled += instance.OnADS;
             }
 
             /// <summary>
@@ -1394,6 +1434,9 @@ namespace SpyQuarrelRuntime
                 @Sprint.started -= instance.OnSprint;
                 @Sprint.performed -= instance.OnSprint;
                 @Sprint.canceled -= instance.OnSprint;
+                @ADS.started -= instance.OnADS;
+                @ADS.performed -= instance.OnADS;
+                @ADS.canceled -= instance.OnADS;
             }
 
             /// <summary>
@@ -1757,6 +1800,13 @@ namespace SpyQuarrelRuntime
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnSprint(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "ADS" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnADS(InputAction.CallbackContext context);
         }
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

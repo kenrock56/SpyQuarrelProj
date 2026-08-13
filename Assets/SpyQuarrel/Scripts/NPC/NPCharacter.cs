@@ -526,8 +526,7 @@ namespace SpyQuarrelRuntime
             _agent.ResetPath();
         }
 
-        private void SetDestinationOverride(
-            Vector3 destination)
+        private void SetDestinationOverride( Vector3 destination)
         {
             if (!IsServer ||
                 _agent == null ||
@@ -563,10 +562,8 @@ namespace SpyQuarrelRuntime
 
         private void ChooseNewDestination()
         {
-            if (!IsServer ||
-                !_isUsingPatrol ||
-                _agent == null ||
-                !_agent.enabled)
+            if (!IsServer || !_isUsingPatrol ||
+                _agent == null || !_agent.enabled)
             {
                 return;
             }
@@ -576,18 +573,12 @@ namespace SpyQuarrelRuntime
 
             StopPatrolServer();
 
-            Debug.LogWarning(
-                "[NPCharacter] Patrol stopped because no valid patrol destination could be found.",
-                this
-            );
+            Debug.LogWarning( "[NPCharacter] Patrol stopped because no valid patrol destination could be found.", this );
         }
 
         private bool TrySetNextPatrolDestination()
         {
-            PatrolPoint[] patrolPoints =
-                _patrolRoute != null
-                    ? _patrolRoute.PatrolPoints
-                    : null;
+            PatrolPoint[] patrolPoints = _patrolRoute != null ? _patrolRoute.PatrolPoints : null;
 
             if (patrolPoints == null ||
                 patrolPoints.Length == 0)
@@ -631,34 +622,22 @@ namespace SpyQuarrelRuntime
 
         private bool TrySetRandomDestination()
         {
-            if (!IsServer ||
-                _agent == null ||
-                !_agent.enabled)
+            if (!IsServer || _agent == null || !_agent.enabled)
             {
                 return false;
             }
 
-            int attempts = Mathf.Max(
-                1,
-                _randomDestinationAttempts
-            );
+            int attempts = Mathf.Max( 1, _randomDestinationAttempts );
 
             for (int i = 0; i < attempts; i++)
             {
-                Vector3 randomOffset = new Vector3(
-                    Random.Range(
-                        -_randomRange,
-                        _randomRange
-                    ),
-                    0f,
-                    Random.Range(
-                        -_randomRange,
-                        _randomRange
-                    )
-                );
 
-                Vector3 randomPosition =
-                    transform.position + randomOffset;
+                var rand1 = Random.Range(-_randomRange, _randomRange);
+                var rand2 = Random.Range(-_randomRange, _randomRange);
+                
+                Vector3 randomOffset = new Vector3( rand1, 0f, rand2 );
+
+                Vector3 randomPosition = transform.position + randomOffset;
 
                 if (TrySetDestination(randomPosition))
                 {
@@ -666,13 +645,11 @@ namespace SpyQuarrelRuntime
                 }
             }
 
-            Debug.LogWarning(
-                $"[NPCharacter] Could not find a valid random destination after {attempts} attempts.",
-                this
-            );
+            Debug.LogWarning($"[NPCharacter] Could not find a valid random destination after {attempts} attempts.", this);
 
             return false;
         }
+        
 
         private bool TrySetDestination(
             Vector3 requestedPosition)
